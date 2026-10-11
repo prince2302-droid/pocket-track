@@ -1,0 +1,30 @@
+{
+  "name": "student-expense-tracker",
+  "version": "1.0.0",
+  "description": "Cloud-connected Student Expense Tracker with UPI & Cash multi-account tracking and MongoDB Atlas persistence.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "expense-tracker",
+    "student",
+    "upi",
+    "cash",
+    "mongodb",
+    "express",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

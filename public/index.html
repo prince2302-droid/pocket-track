@@ -82,8 +82,8 @@
   <!-- Main Container -->
   <div class="min-h-screen flex flex-col">
     
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
+    <!-- Top Header -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
         <!-- Logo & Branding -->
@@ -94,43 +94,19 @@
           <div>
             <div class="flex items-center gap-2">
               <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 dark:from-brand-400 dark:to-purple-400 bg-clip-text text-transparent">PocketTrack</span>
-              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">PRO</span>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">CLOUD</span>
             </div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden md:block">Multi-Account & Cloud Passbook</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">UPI, Cash & Pocket Money Manager</p>
           </div>
         </div>
 
-        <!-- Desktop Navigation Tabs (Dynamic Multi-Page View Switcher) -->
-        <nav class="hidden md:flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold">
-          <button id="navTabDashboard" onclick="window.app.switchView('dashboard')" class="px-3.5 py-1.5 rounded-xl border border-transparent transition flex items-center gap-2 nav-tab-active">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Dashboard</span>
-          </button>
-          <button id="navTabAdd" onclick="window.app.switchView('add')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2">
-            <i class="fa-solid fa-circle-plus text-brand-600 dark:text-brand-400"></i>
-            <span>Record</span>
-          </button>
-          <button id="navTabAnalytics" onclick="window.app.switchView('analytics')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2">
-            <i class="fa-solid fa-chart-simple"></i>
-            <span>Analytics</span>
-          </button>
-          <button id="navTabHistory" onclick="window.app.switchView('history')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2">
-            <i class="fa-solid fa-receipt"></i>
-            <span>Passbook</span>
-          </button>
-          <button id="navTabSettings" onclick="window.app.switchView('settings')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2">
-            <i class="fa-solid fa-gear"></i>
-            <span>Settings</span>
-          </button>
-        </nav>
-
-        <!-- Right Controls: Cloud Status, Install, User Auth, Theme -->
-        <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Right Controls: Status, Install, User Account, Theme -->
+        <div class="flex items-center gap-2 sm:gap-3">
           
           <!-- Cloud DB Status Badge -->
-          <div id="cloudStatusBadge" class="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80 transition" title="MongoDB Atlas Cloud Database">
+          <div id="cloudStatusBadge" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80 transition" title="Connected to MongoDB Atlas Cloud Database">
             <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 live-indicator"></span>
-            <span id="cloudStatusText" class="hidden lg:inline text-[11px]">MongoDB Atlas</span>
+            <span id="cloudStatusText" class="text-[11px] font-bold">MongoDB Atlas</span>
           </div>
 
           <!-- Install App Button (PWA) -->
@@ -139,10 +115,10 @@
             <span class="hidden sm:inline">Install</span>
           </button>
 
-          <!-- User Authentication / Profile Button -->
-          <button id="authBtn" class="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-brand-700 dark:text-brand-300 border border-indigo-200 dark:border-indigo-800/80 transition flex items-center gap-1.5" title="User Account & Cloud Sync">
-            <i id="authBtnIcon" class="fa-solid fa-user-lock"></i>
-            <span id="authBtnText">Sign In</span>
+          <!-- User Account Pill -->
+          <button id="authBtn" class="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-brand-700 dark:text-brand-300 border border-indigo-200 dark:border-indigo-800/80 transition flex items-center gap-1.5" title="Account & Preferences">
+            <i id="authBtnIcon" class="fa-solid fa-circle-user text-brand-600 dark:text-brand-400"></i>
+            <span id="authBtnText">Prince</span>
           </button>
 
           <!-- Theme Toggle -->
@@ -153,19 +129,51 @@
         </div>
 
       </div>
+
+      <!-- Prominent Multi-View Navigation Bar (Visible on ALL devices) -->
+      <div class="border-t border-slate-200/60 dark:border-slate-800/60 bg-slate-50/70 dark:bg-slate-900/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
+          <nav id="appNav" class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto text-xs font-bold scrollbar-none py-0.5">
+            <button id="navTabDashboard" onclick="window.app.switchView('dashboard')" class="px-3.5 py-1.5 rounded-xl border border-transparent transition flex items-center gap-2 nav-tab-active font-extrabold whitespace-nowrap shadow-sm">
+              <i class="fa-solid fa-house"></i>
+              <span>Home</span>
+            </button>
+            <button id="navTabAdd" onclick="window.app.switchView('add')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-circle-plus text-brand-600 dark:text-brand-400"></i>
+              <span>Record</span>
+            </button>
+            <button id="navTabTransfer" onclick="window.app.switchView('transfer')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-right-left text-sky-500"></i>
+              <span>Transfer</span>
+            </button>
+            <button id="navTabAnalytics" onclick="window.app.switchView('analytics')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-chart-simple text-purple-500"></i>
+              <span>Analytics</span>
+            </button>
+            <button id="navTabHistory" onclick="window.app.switchView('history')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-receipt text-emerald-500"></i>
+              <span>Passbook</span>
+            </button>
+            <button id="navTabSettings" onclick="window.app.switchView('settings')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-gear text-slate-400"></i>
+              <span>Settings</span>
+            </button>
+          </nav>
+        </div>
+      </div>
     </header>
 
-    <!-- Sub-Header: User Greetings Banner & Current View Context -->
-    <div class="bg-white/40 dark:bg-slate-900/40 border-b border-slate-200/50 dark:border-slate-800/50 py-2.5">
+    <!-- Sub-Header: Greetings & Currency -->
+    <div class="bg-white/40 dark:bg-slate-900/40 border-b border-slate-200/50 dark:border-slate-800/50 py-2">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between text-xs">
         <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-          <span class="w-2 h-2 rounded-full bg-brand-500"></span>
-          <span id="userWelcomeText" class="font-bold">Welcome, Guest! Log in to save transactions permanently to your account.</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span id="userWelcomeText" class="font-bold">Welcome back, <strong class="text-brand-600 dark:text-brand-400 font-extrabold">Prince</strong>! Permanent MongoDB Atlas sync active.</span>
         </div>
-        <div class="hidden sm:flex items-center gap-3 text-slate-400">
-          <span id="headerDateDisplay" class="font-medium"></span>
-          <span class="text-slate-300 dark:text-slate-700">•</span>
-          <span id="activeCurrencyDisplay" class="font-bold text-brand-600 dark:text-brand-400">INR (₹)</span>
+        <div class="flex items-center gap-3 text-slate-400">
+          <span id="headerDateDisplay" class="font-medium hidden sm:inline"></span>
+          <span class="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+          <span id="activeCurrencyDisplay" class="font-bold text-brand-600 dark:text-brand-400">₹ (INR)</span>
         </div>
       </div>
     </div>
@@ -173,191 +181,146 @@
     <!-- Main Dynamic Views Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8">
       
-      <!-- ======================================================== -->
-      <!-- VIEW 1: DASHBOARD (Summary, Wallets, Quick Shortcuts) -->
-      <!-- ======================================================== -->
-      <section id="viewDashboard" class="app-view active-view space-y-7">
+      <!-- ================================================================= -->
+      <!-- VIEW 1: HOME PAGE (ONLY SHOWS UPI, CASH & TOTAL POCKET MONEY) -->
+      <!-- ================================================================= -->
+      <section id="viewDashboard" class="app-view active-view space-y-8 max-w-5xl mx-auto">
         
-        <!-- Multi-Account Dashboard Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          
-          <!-- Card 1: Total Balance / Net Worth -->
-          <div class="glass-panel card-glow-pocket rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Net Balance</span>
-              <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center text-sm font-bold">
-                <i class="fa-solid fa-vault"></i>
-              </div>
-            </div>
-            <div>
-              <div id="statTotalBalance" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">₹0.00</div>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
-                <i class="fa-solid fa-arrows-split-up-and-left text-brand-500"></i>
-                <span>Combined UPI + Cash Funds</span>
-              </p>
-            </div>
-          </div>
+        <!-- Header Title -->
+        <div class="text-center sm:text-left">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Financial Overview</h1>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Live balances across your dual student wallets & pocket allowance</p>
+        </div>
 
-          <!-- Card 2: UPI Wallet Balance -->
-          <div class="glass-panel card-glow-upi rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">UPI Online Wallet</span>
-              <div class="w-9 h-9 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-sm font-bold">
+        <!-- The 3 Core Balance Cards Requested By User -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          
+          <!-- CARD 1: UPI BALANCE -->
+          <div class="glass-panel card-glow-upi rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">UPI Balance</span>
+                <p class="text-[11px] text-slate-400">Online digital funds</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xl font-bold shadow-sm">
                 <i class="fa-solid fa-mobile-screen"></i>
               </div>
             </div>
             <div>
-              <div id="statUpiBalance" class="text-2xl sm:text-3xl font-extrabold text-sky-700 dark:text-sky-300 tracking-tight">₹0.00</div>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+              <div id="statUpiBalance" class="text-3xl sm:text-4xl font-black text-sky-700 dark:text-sky-300 tracking-tight">₹0.00</div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
                 <i class="fa-solid fa-qrcode text-sky-500"></i>
-                <span>GPay / PhonePe / Paytm</span>
+                <span>GPay • PhonePe • Paytm</span>
               </p>
             </div>
           </div>
 
-          <!-- Card 3: Cash in Pocket Balance -->
-          <div class="glass-panel card-glow-cash rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Physical Cash</span>
-              <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm font-bold">
+          <!-- CARD 2: CASH BALANCE -->
+          <div class="glass-panel card-glow-cash rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Cash Balance</span>
+                <p class="text-[11px] text-slate-400">Physical money in pocket</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl font-bold shadow-sm">
                 <i class="fa-solid fa-money-bill-wave"></i>
               </div>
             </div>
             <div>
-              <div id="statCashBalance" class="text-2xl sm:text-3xl font-extrabold text-emerald-700 dark:text-emerald-300 tracking-tight">₹0.00</div>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+              <div id="statCashBalance" class="text-3xl sm:text-4xl font-black text-emerald-700 dark:text-emerald-300 tracking-tight">₹0.00</div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
                 <i class="fa-solid fa-wallet text-emerald-500"></i>
                 <span>Cash in Pocket / Hostel</span>
               </p>
             </div>
           </div>
 
-          <!-- Card 4: Total Spent This Month -->
-          <div class="glass-panel card-glow-spend rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Total Spent</span>
-              <div class="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-sm font-bold">
-                <i class="fa-solid fa-receipt"></i>
+          <!-- CARD 3: TOTAL POCKET MONEY -->
+          <div class="glass-panel card-glow-pocket rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">Total Pocket Money</span>
+                <p class="text-[11px] text-slate-400">Allowance received</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xl font-bold shadow-sm">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
               </div>
             </div>
             <div>
-              <div id="statTotalSpent" class="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 tracking-tight">₹0.00</div>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
-                <span id="spendRatioText" class="font-bold text-rose-600">0%</span>
-                <span class="text-slate-500">of pocket money consumed</span>
+              <div id="statPocketMoneyTotal" class="text-3xl sm:text-4xl font-black text-brand-700 dark:text-brand-300 tracking-tight">₹0.00</div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
+                <i class="fa-solid fa-piggy-bank text-brand-500"></i>
+                <span>From Parents, Relatives & Gifts</span>
               </p>
             </div>
           </div>
 
         </div>
 
-        <!-- Pocket Money Progress & Velocity Meter -->
-        <div class="glass-panel rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
-            <div>
-              <h3 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-gauge-high text-brand-600 dark:text-brand-400"></i>
-                <span>Pocket Money Fuel Gauge</span>
-              </h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track how much allowance is remaining before month-end</p>
-            </div>
-            <div class="flex items-center gap-4 text-xs font-semibold">
-              <span class="text-slate-500 dark:text-slate-400">Received: <strong id="statPocketMoneyTotal" class="text-emerald-600 font-bold">₹0</strong></span>
-              <span class="text-slate-500 dark:text-slate-400">Remaining: <strong id="statPocketMoneyRemaining" class="text-brand-600 font-bold">₹0</strong></span>
-            </div>
-          </div>
-
-          <!-- Progress Bar -->
-          <div class="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200/60 dark:border-slate-700/60">
-            <div id="budgetProgressBar" class="h-full rounded-full bg-gradient-to-r from-emerald-500 via-brand-500 to-rose-500 progress-shimmer transition-all duration-700" style="width: 0%"></div>
-          </div>
-        </div>
-
-        <!-- Quick Action Cards (Dynamic Page Switcher Buttons) -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          <button onclick="window.app.switchView('add', { type: 'expense' })" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-rose-300 dark:hover:border-rose-900/50 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 group text-center">
-            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-lg group-hover:scale-110 transition">
-              <i class="fa-solid fa-minus"></i>
-            </div>
-            <span class="text-xs font-extrabold text-slate-900 dark:text-white">Add Expense</span>
-            <span class="text-[10px] text-slate-400">Food, metro, books</span>
-          </button>
-
-          <button onclick="window.app.switchView('add', { type: 'income' })" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-900/50 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 group text-center">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg group-hover:scale-110 transition">
-              <i class="fa-solid fa-plus"></i>
-            </div>
-            <span class="text-xs font-extrabold text-slate-900 dark:text-white">Add Pocket Money</span>
-            <span class="text-[10px] text-slate-400">From parents, gifts</span>
-          </button>
-
-          <button onclick="window.app.switchView('add', { subtab: 'transfer' })" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-900/50 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 group text-center">
-            <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-lg group-hover:scale-110 transition">
-              <i class="fa-solid fa-right-left"></i>
-            </div>
-            <span class="text-xs font-extrabold text-slate-900 dark:text-white">ATM Transfer</span>
-            <span class="text-[10px] text-slate-400">UPI ⇄ Cash withdraw</span>
-          </button>
-
-          <button onclick="window.app.switchView('analytics')" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-900/50 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 group text-center">
-            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center text-lg group-hover:scale-110 transition">
-              <i class="fa-solid fa-chart-pie"></i>
-            </div>
-            <span class="text-xs font-extrabold text-slate-900 dark:text-white">View Analytics</span>
-            <span class="text-[10px] text-slate-400">Category breakdown</span>
-          </button>
-        </div>
-
-        <!-- Recent Activity Section with 'View Passbook' Button -->
-        <div class="glass-panel rounded-2xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-brand-600"></i>
-                <span>Recent Transactions</span>
-              </h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Latest wallet inflows and outflows</p>
-            </div>
-            <button onclick="window.app.switchView('history')" class="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1.5">
-              <span>View All Passbook</span>
-              <i class="fa-solid fa-arrow-right"></i>
+        <!-- Quick Action Jump Buttons (Instant Access to other sections) -->
+        <div class="pt-4 space-y-3">
+          <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Quick Actions</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            
+            <button onclick="window.app.switchView('add', { type: 'expense' })" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-rose-400 dark:hover:border-rose-800 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 text-center group">
+              <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-minus"></i>
+              </div>
+              <span class="text-xs font-extrabold text-slate-900 dark:text-white">Record Expense</span>
+              <span class="text-[10px] text-slate-400">Food, metro, books</span>
             </button>
-          </div>
 
-          <!-- Mini Recent List -->
-          <div id="recentTransactionsList" class="space-y-2.5">
-            <!-- Dynamically injected items -->
+            <button onclick="window.app.switchView('add', { type: 'income' })" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-800 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 text-center group">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-plus"></i>
+              </div>
+              <span class="text-xs font-extrabold text-slate-900 dark:text-white">Add Pocket Money</span>
+              <span class="text-[10px] text-slate-400">Receive allowance</span>
+            </button>
+
+            <button onclick="window.app.switchView('transfer')" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-sky-400 dark:hover:border-sky-800 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 text-center group">
+              <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-right-left"></i>
+              </div>
+              <span class="text-xs font-extrabold text-slate-900 dark:text-white">ATM Transfer</span>
+              <span class="text-[10px] text-slate-400">UPI ⇄ Cash withdrawal</span>
+            </button>
+
+            <button onclick="window.app.switchView('history')" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-800 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 text-center group">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-receipt"></i>
+              </div>
+              <span class="text-xs font-extrabold text-slate-900 dark:text-white">View Passbook</span>
+              <span class="text-[10px] text-slate-400">Complete statement</span>
+            </button>
+
           </div>
         </div>
 
       </section>
 
-      <!-- ======================================================== -->
-      <!-- VIEW 2: RECORD / ADD TRANSACTION & TRANSFER -->
-      <!-- ======================================================== -->
+      <!-- ================================================================= -->
+      <!-- VIEW 2: RECORD / ADD TRANSACTION (EXPENSE & POCKET MONEY) -->
+      <!-- ================================================================= -->
       <section id="viewAdd" class="app-view space-y-6 max-w-2xl mx-auto">
         
-        <!-- Header & Subtab Switcher -->
-        <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-4">
+        <div class="glass-panel rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-4">
           <div>
             <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">Record Transaction</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Log incoming pocket money, student expense, or ATM withdrawal</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Log an expense or pocket money deposit permanently into MongoDB</p>
           </div>
-          <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
-            <button id="addTabExpenseBtn" onclick="window.app.switchAddSubtab('expense')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition">Expense / Income</button>
-            <button id="addTabTransferBtn" onclick="window.app.switchAddSubtab('transfer')" class="px-3 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Transfer</button>
-          </div>
+          <button onclick="window.app.switchView('dashboard')" class="text-xs font-bold text-brand-600 hover:underline flex items-center gap-1">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back Home</span>
+          </button>
         </div>
 
-        <!-- Subtab 1: Expense & Pocket Money Form -->
-        <div id="subtabExpenseForm" class="glass-panel rounded-3xl p-5 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
+        <!-- Add Form Container -->
+        <div class="glass-panel rounded-3xl p-5 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
           
-          <!-- Campus Quick Presets Pills -->
+          <!-- Quick Presets -->
           <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Campus Quick Presets</span>
-              <span class="text-[11px] text-brand-600 dark:text-brand-400 font-semibold">1-Tap Fill</span>
-            </div>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Campus Quick Presets</span>
             <div class="flex flex-wrap gap-1.5">
               <button type="button" class="preset-chip text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition" data-title="Canteen Chai & Samosa" data-amount="30" data-cat="Food & Canteen" data-acc="UPI" data-type="expense">☕ Chai ₹30</button>
               <button type="button" class="preset-chip text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition" data-title="Canteen Lunch Thali" data-amount="90" data-cat="Food & Canteen" data-acc="Cash" data-type="expense">🍱 Lunch ₹90</button>
@@ -374,7 +337,7 @@
 
             <!-- Type Selector: Expense vs Pocket Money -->
             <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Transaction Nature</label>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Type</label>
               <div class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
                 <button type="button" id="btnTypeExpense" class="py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 bg-rose-600 text-white shadow-sm shadow-rose-600/30">
                   <i class="fa-solid fa-arrow-down"></i>
@@ -415,13 +378,13 @@
               </div>
             </div>
 
-            <!-- Title / Description -->
+            <!-- Description -->
             <div>
-              <label for="txTitle" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Description / Memo <span class="text-rose-500">*</span></label>
+              <label for="txTitle" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Description <span class="text-rose-500">*</span></label>
               <input type="text" id="txTitle" placeholder="e.g. Canteen Lunch, Books, Hostel Rent" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500 focus:outline-none">
             </div>
 
-            <!-- Amount & Category (2 Columns) -->
+            <!-- Amount & Category -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label for="txAmount" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Amount <span class="text-rose-500">*</span></label>
@@ -434,27 +397,26 @@
               <div>
                 <label for="txCategory" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Category <span class="text-rose-500">*</span></label>
                 <select id="txCategory" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer">
-                  <!-- Injected via JavaScript -->
+                  <!-- Populated via JS -->
                 </select>
               </div>
             </div>
 
-            <!-- Date & Optional Notes -->
+            <!-- Date & Notes -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label for="txDate" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Transaction Date</label>
+                <label for="txDate" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Date</label>
                 <input type="date" id="txDate" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
               </div>
 
               <div>
                 <label for="txNotes" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Note (Optional)</label>
-                <input type="text" id="txNotes" placeholder="e.g. Split with Anurag" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                <input type="text" id="txNotes" placeholder="e.g. Shared with roommates" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
               </div>
             </div>
 
-            <!-- Submit Button -->
             <div class="pt-2">
-              <button type="submit" id="submitBtn" class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2">
+              <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-plus-circle"></i>
                 <span id="submitBtnText">Add Expense</span>
               </button>
@@ -463,20 +425,29 @@
 
         </div>
 
-        <!-- Subtab 2: ATM / Quick Transfer Form -->
-        <div id="subtabTransferForm" class="glass-panel rounded-3xl p-5 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6 hidden">
-          <div>
-            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <i class="fa-solid fa-right-left text-brand-600"></i>
-              <span>Transfer Between UPI & Cash</span>
-            </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Atm withdrawals or cash deposits simply shift money between accounts without altering your spending totals.</p>
-          </div>
+      </section>
 
+      <!-- ================================================================= -->
+      <!-- VIEW 3: TRANSFER FUNDS (ATM CASH WITHDRAWAL / DEPOSIT) -->
+      <!-- ================================================================= -->
+      <section id="viewTransfer" class="app-view space-y-6 max-w-2xl mx-auto">
+        
+        <div class="glass-panel rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">ATM Cash Transfer</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Shift funds between UPI and Cash without altering your total allowance</p>
+          </div>
+          <button onclick="window.app.switchView('dashboard')" class="text-xs font-bold text-brand-600 hover:underline flex items-center gap-1">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back Home</span>
+          </button>
+        </div>
+
+        <div class="glass-panel rounded-3xl p-5 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
           <form id="transferForm" class="space-y-5">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label for="transferFrom" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">From Account</label>
+                <label for="transferFrom" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Source Account (From)</label>
                 <select id="transferFrom" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white">
                   <option value="UPI" selected>UPI Online Wallet</option>
                   <option value="Cash">Physical Cash</option>
@@ -484,7 +455,7 @@
               </div>
 
               <div>
-                <label for="transferTo" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">To Account</label>
+                <label for="transferTo" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Destination Account (To)</label>
                 <select id="transferTo" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white">
                   <option value="Cash" selected>Physical Cash (In Pocket)</option>
                   <option value="UPI">UPI Online Wallet</option>
@@ -502,12 +473,12 @@
 
             <div>
               <label for="transferNotes" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Note (Optional)</label>
-              <input type="text" id="transferNotes" placeholder="e.g. Withdrew from campus SBI ATM" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white">
+              <input type="text" id="transferNotes" placeholder="e.g. Withdrew from college SBI ATM" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white">
             </div>
 
             <div class="pt-2">
-              <button type="submit" class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-lg shadow-brand-500/25 transition">
-                Execute Transfer
+              <button type="submit" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-lg shadow-brand-500/25 transition">
+                Execute ATM Transfer
               </button>
             </div>
           </form>
@@ -515,36 +486,32 @@
 
       </section>
 
-      <!-- ======================================================== -->
-      <!-- VIEW 3: ANALYTICS & VISUAL REPORTS -->
-      <!-- ======================================================== -->
+      <!-- ================================================================= -->
+      <!-- VIEW 4: ANALYTICS & VISUAL REPORTS -->
+      <!-- ================================================================= -->
       <section id="viewAnalytics" class="app-view space-y-6">
         
-        <!-- Analytics Header & Chart Controls -->
         <div class="glass-panel rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
               <i class="fa-solid fa-chart-pie text-brand-600"></i>
               <span>Spending Breakdown & Analytics</span>
             </h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">Track where your student allowance goes by category</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Visual insights on where your money goes</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <!-- Account Filter: All / UPI / Cash -->
             <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
               <button id="chartFilterAll" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition">All</button>
               <button id="chartFilterUPI" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">UPI</button>
               <button id="chartFilterCash" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Cash</button>
             </div>
 
-            <!-- Chart Type: Donut vs Bar -->
             <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
               <button id="chartViewDonut" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition" title="Donut View"><i class="fa-solid fa-circle-notch"></i></button>
               <button id="chartViewBar" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition" title="Bar Chart"><i class="fa-solid fa-chart-column"></i></button>
             </div>
 
-            <!-- Export CSV -->
             <button id="exportCsvBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
               <i class="fa-solid fa-file-arrow-down text-brand-600"></i>
               <span>Export CSV</span>
@@ -555,11 +522,9 @@
         <!-- Main Chart & Leaderboard Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          <!-- Interactive Donut / Bar Canvas -->
           <div class="lg:col-span-7 glass-panel rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col items-center justify-center relative min-h-[380px]">
             <div class="w-full max-w-sm aspect-square relative flex items-center justify-center">
               <canvas id="expenseChart" class="w-full h-full"></canvas>
-              <!-- Center Metric Overlay -->
               <div id="chartCenterOverlay" class="absolute flex flex-col items-center justify-center text-center pointer-events-none">
                 <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Spent</span>
                 <span id="chartCenterAmount" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">₹0</span>
@@ -569,11 +534,10 @@
             <div id="noDataChart" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-slate-400">
               <i class="fa-solid fa-chart-pie text-4xl mb-2 text-slate-300 dark:text-slate-700"></i>
               <p class="text-xs font-semibold">No expense records found yet.</p>
-              <button onclick="window.app.switchView('add')" class="mt-3 px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-600 text-white">Log First Expense</button>
+              <button onclick="window.app.switchView('add')" class="mt-3 px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-600 text-white">Record Expense</button>
             </div>
           </div>
 
-          <!-- Category Spending Leaderboard -->
           <div class="lg:col-span-5 glass-panel rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between space-y-4">
             <div>
               <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -581,13 +545,13 @@
                 <span id="chartCategoryCount" class="text-[11px] font-bold text-brand-600 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full">0 Categories</span>
               </div>
               <div id="categoryLeaderboard" class="space-y-3">
-                <!-- Dynamically populated -->
+                <!-- Populated via JS -->
               </div>
             </div>
             
             <div class="p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 text-xs text-brand-900 dark:text-brand-300">
-              <p class="font-bold mb-0.5"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> Student Smart Tip</p>
-              <p class="text-[11px] text-slate-600 dark:text-slate-400">Categorizing food and academics separately helps prevent pocket money starvation during final exam weeks!</p>
+              <p class="font-bold mb-0.5"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> Student Tip</p>
+              <p class="text-[11px] text-slate-600 dark:text-slate-400">Categorizing canteen meals vs college books helps you save before month-end!</p>
             </div>
           </div>
 
@@ -595,15 +559,13 @@
 
       </section>
 
-      <!-- ======================================================== -->
-      <!-- VIEW 4: PASSBOOK / TRANSACTION HISTORY -->
-      <!-- ======================================================== -->
+      <!-- ================================================================= -->
+      <!-- VIEW 5: PASSBOOK (FULL TRANSACTION STATEMENT) -->
+      <!-- ================================================================= -->
       <section id="viewHistory" class="app-view space-y-5">
         
-        <!-- Filter & Search Toolbar -->
         <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 space-y-4">
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <!-- Search Input -->
             <div class="relative flex-1">
               <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
               <input type="text" id="searchInput" placeholder="Search transactions (e.g. Canteen, Metro)... (Ctrl+K)" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-9 py-2 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500">
@@ -612,23 +574,19 @@
               </button>
             </div>
 
-            <!-- Quick Add Shortcut -->
             <button onclick="window.app.switchView('add')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20 transition flex items-center justify-center gap-1.5 shrink-0">
               <i class="fa-solid fa-plus"></i>
               <span>Add Record</span>
             </button>
           </div>
 
-          <!-- Secondary Filter Bar -->
           <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800/60">
-            <!-- Account Tabs (All / UPI / Cash) -->
             <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
               <button id="tabFilterAll" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition">All</button>
               <button id="tabFilterUPI" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"><i class="fa-solid fa-mobile-screen mr-1 text-[10px]"></i> UPI</button>
               <button id="tabFilterCash" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"><i class="fa-solid fa-money-bill mr-1 text-[10px]"></i> Cash</button>
             </div>
 
-            <!-- Dropdown Filters: Category, Type, Sort -->
             <div class="flex items-center gap-2">
               <select id="filterCategory" class="bg-slate-100 dark:bg-slate-800 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none cursor-pointer">
                 <option value="all">All Categories</option>
@@ -651,50 +609,47 @@
           </div>
         </div>
 
-        <!-- Full Transaction Passbook List -->
+        <!-- Transaction Cards -->
         <div class="space-y-2.5">
           <div class="flex items-center justify-between px-1">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Entries Found: <span id="txCountBadge" class="text-slate-800 dark:text-white font-extrabold">0</span></span>
-            <span class="text-[11px] text-slate-400">Click trash can icon to permanently delete</span>
+            <span class="text-[11px] text-slate-400">Permanently saved in MongoDB Atlas</span>
           </div>
 
-          <!-- Transaction List -->
           <div id="transactionList" class="space-y-2.5">
             <!-- Dynamically populated -->
           </div>
 
-          <!-- Empty State -->
           <div id="emptyState" class="hidden glass-panel rounded-3xl p-10 text-center border border-slate-200/80 dark:border-slate-800 space-y-3">
             <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto text-xl">
               <i class="fa-solid fa-receipt"></i>
             </div>
             <h4 class="text-sm font-bold text-slate-900 dark:text-white">No transactions match your search</h4>
-            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">Try clearing your filters or record a new expense or pocket money allowance.</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">Try clearing your filters or record a new expense.</p>
             <button onclick="window.app.switchView('add')" class="mt-2 px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white">Record Transaction</button>
           </div>
         </div>
 
       </section>
 
-      <!-- ======================================================== -->
-      <!-- VIEW 5: ACCOUNT & SETTINGS -->
-      <!-- ======================================================== -->
+      <!-- ================================================================= -->
+      <!-- VIEW 6: ACCOUNT & SETTINGS -->
+      <!-- ================================================================= -->
       <section id="viewSettings" class="app-view space-y-6 max-w-2xl mx-auto">
         
-        <!-- User Profile Card -->
         <div class="glass-panel rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
           <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
             <div class="flex items-center gap-3.5">
               <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center text-xl font-black shadow-glow-indigo">
-                <span id="settingsUserAvatarLetter">G</span>
+                <span id="settingsUserAvatarLetter">P</span>
               </div>
               <div>
-                <h3 id="settingsUserName" class="text-base font-extrabold text-slate-900 dark:text-white">Guest User</h3>
-                <p id="settingsUserEmail" class="text-xs text-slate-500 dark:text-slate-400">Offline / Demo Mode</p>
+                <h3 id="settingsUserName" class="text-base font-extrabold text-slate-900 dark:text-white">Prince Shrivastva</h3>
+                <p id="settingsUserEmail" class="text-xs text-slate-500 dark:text-slate-400">princeshrivastva12@gmail.com</p>
               </div>
             </div>
             <button id="settingsAuthActionBtn" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white transition">
-              Sign In
+              Switch Account
             </button>
           </div>
 
@@ -711,7 +666,6 @@
               </select>
               <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
             </div>
-            <p class="text-[11px] text-slate-400">All balances and reports will be displayed in this currency.</p>
           </div>
 
           <!-- Install App Card -->
@@ -721,8 +675,8 @@
                 <i class="fa-solid fa-mobile-screen"></i>
               </div>
               <div>
-                <h4 class="text-xs font-bold text-emerald-900 dark:text-emerald-300">Install PocketTrack as an App</h4>
-                <p class="text-[11px] text-slate-600 dark:text-slate-400">Add to your phone or desktop home screen</p>
+                <h4 class="text-xs font-bold text-emerald-900 dark:text-emerald-300">Install PocketTrack App</h4>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400">Run as standalone app on your phone or PC</p>
               </div>
             </div>
             <button onclick="window.app.openInstallModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shrink-0">
@@ -741,7 +695,7 @@
                 <span>MongoDB Atlas (Permanent)</span>
               </span>
             </div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">All your financial transactions and profile data are stored permanently in the cloud cluster. Your information is never erased.</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">All balances and transactions are stored directly in your MongoDB Atlas cloud database. Data is never erased.</p>
           </div>
 
         </div>
@@ -750,47 +704,17 @@
 
     </main>
 
-    <!-- Mobile Sticky Bottom Navigation Bar (Dynamic SPA App Feeling) -->
-    <nav id="mobileNav" class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800/80 flex items-center justify-around py-2 px-3 shadow-2xl">
-      <button onclick="window.app.switchView('dashboard')" id="mobileNavDashboard" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 mobile-nav-active">
-        <i class="fa-solid fa-chart-pie text-base"></i>
-        <span class="text-[10px] font-bold">Home</span>
-      </button>
-
-      <button onclick="window.app.switchView('analytics')" id="mobileNavAnalytics" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
-        <i class="fa-solid fa-chart-simple text-base"></i>
-        <span class="text-[10px] font-bold">Analytics</span>
-      </button>
-
-      <!-- Center Big Add Button -->
-      <button onclick="window.app.switchView('add')" class="mobile-nav-btn -mt-5 w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center text-xl shadow-glow-indigo border-2 border-white dark:border-slate-900">
-        <i class="fa-solid fa-plus"></i>
-      </button>
-
-      <button onclick="window.app.switchView('history')" id="mobileNavHistory" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
-        <i class="fa-solid fa-receipt text-base"></i>
-        <span class="text-[10px] font-bold">Passbook</span>
-      </button>
-
-      <button onclick="window.app.switchView('settings')" id="mobileNavSettings" class="mobile-nav-btn flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400">
-        <i class="fa-solid fa-user text-base"></i>
-        <span class="text-[10px] font-bold">Profile</span>
-      </button>
-    </nav>
-
-    <!-- User Authentication Modal (Sign In / Register) -->
+    <!-- User Authentication Modal (Switch Account / Sign In / Register) -->
     <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
       <div id="authModalContent" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl transition-all transform scale-95 opacity-0 space-y-5">
-        
-        <!-- Header -->
         <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-purple-600 flex items-center justify-center text-white text-lg shadow-md">
               <i class="fa-solid fa-shield-halved"></i>
             </div>
             <div>
-              <h3 id="authModalTitle" class="font-extrabold text-base text-slate-900 dark:text-white">Account Authentication</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Save your data permanently in MongoDB Atlas</p>
+              <h3 id="authModalTitle" class="font-extrabold text-base text-slate-900 dark:text-white">Account & Cloud Sync</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Saved permanently in MongoDB Atlas</p>
             </div>
           </div>
           <button id="closeAuthModalBtn" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
@@ -798,33 +722,27 @@
           </button>
         </div>
 
-        <!-- Auth Tabs: Sign In vs Sign Up -->
         <div class="grid grid-cols-2 gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
-          <button type="button" id="tabAuthLogin" class="py-2 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition">Sign In</button>
+          <button type="button" id="tabAuthLogin" class="py-2 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition font-bold">Sign In</button>
           <button type="button" id="tabAuthSignup" class="py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Create Account</button>
         </div>
 
-        <!-- Auth Error Alert -->
         <div id="authErrorAlert" class="hidden p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/80 text-rose-700 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
           <i class="fa-solid fa-circle-exclamation shrink-0"></i>
           <span id="authErrorMsg">Error message</span>
         </div>
 
-        <!-- Auth Form -->
         <form id="authForm" class="space-y-4">
-          <!-- Name Field (Only shown in Signup mode) -->
           <div id="authNameField" class="hidden">
             <label for="authName" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Full Name</label>
             <input type="text" id="authName" placeholder="e.g. Prince Shrivastva" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 dark:text-white">
           </div>
 
-          <!-- Email Field -->
           <div>
             <label for="authEmail" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Email Address</label>
             <input type="email" id="authEmail" placeholder="your.name@student.college.edu" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 dark:text-white">
           </div>
 
-          <!-- Password Field -->
           <div>
             <label for="authPassword" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Password</label>
             <input type="password" id="authPassword" placeholder="Minimum 6 characters" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 dark:text-white">
@@ -835,20 +753,17 @@
               <i class="fa-solid fa-arrow-right-to-bracket"></i>
               <span id="authSubmitText">Sign In</span>
             </button>
-
             <button type="button" id="continueGuestBtn" class="w-full py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-              Continue in Demo Mode
+              Close
             </button>
           </div>
         </form>
-
       </div>
     </div>
 
-    <!-- PWA Install Modal / Instructions -->
+    <!-- PWA Install Modal -->
     <div id="installModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
       <div id="installModalContent" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl transition-all transform scale-95 opacity-0">
-        
         <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-500 flex items-center justify-center text-white text-lg shadow-md">
@@ -899,20 +814,19 @@
             Got It
           </button>
         </div>
-
       </div>
     </div>
 
     <!-- Toast Notification Container -->
-    <div id="toastContainer" class="fixed bottom-20 sm:bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
     <!-- Footer -->
-    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm py-6 text-center text-xs text-slate-500 dark:text-slate-400 hidden md:block">
+    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm py-5 text-center text-xs text-slate-500 dark:text-slate-400">
       <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p>© 2026 PocketTrack. Student Multi-Account Finance & MongoDB Atlas Persistence.</p>
+        <p>© 2026 PocketTrack • Connected to MongoDB Atlas Cloud</p>
         <div class="flex items-center gap-4 text-slate-400 dark:text-slate-500">
-          <span><i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> Private & Cloud Backed</span>
-          <span><i class="fa-solid fa-bolt text-amber-500 mr-1"></i> REST API Enabled</span>
+          <span><i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> Data Saved Permanently</span>
+          <span><i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Instant Cloud Sync</span>
         </div>
       </div>
     </footer>

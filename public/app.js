@@ -1,8 +1,11 @@
 /**
  * PocketTrack — Student Multi-Account Expense Tracker
- * Frontend Application Controller (SPA Multi-View Architecture)
- * Supports: User Signup/Login (JWT), Permanent MongoDB Cloud Sync,
- * Dynamic Multi-Page Views, Chart.js Visual Analytics, and PWA App Mode.
+ * Frontend Controller (SPA Multi-View Architecture)
+ * Features:
+ * - Home Page: Clean minimal display of ONLY UPI balance, Cash balance, and Total Pocket Money
+ * - Dynamic SPA Views: Home, Record, Transfer, Analytics, Passbook, Settings
+ * - Instant Access: Auto-authenticates and persists permanently in MongoDB Atlas
+ * - PWA Support: Standalone app capability with home screen installation
  */
 
 const CATEGORIES = {
@@ -80,7 +83,7 @@ class SoundFX {
 }
 
 // ==========================================
-// Main Student Application Class
+// Main Application Controller
 // ==========================================
 class StudentExpenseApp {
   constructor() {
@@ -93,7 +96,7 @@ class StudentExpenseApp {
     // Authentication State (JWT)
     this.token = localStorage.getItem('pt_jwt_token') || null;
     this.user = JSON.parse(localStorage.getItem('pt_user') || 'null');
-    this.authMode = 'login'; // 'login' or 'signup'
+    this.authMode = 'login';
 
     // Preferences
     this.currency = localStorage.getItem('pt_currency') || (this.user ? this.user.defaultCurrency : '₹') || '₹';
@@ -112,7 +115,7 @@ class StudentExpenseApp {
       categoryBreakdown: {}
     };
 
-    // Filter Store for History View
+    // History Passbook Filters
     this.filters = {
       account: 'all',
       type: 'all',
@@ -129,7 +132,7 @@ class StudentExpenseApp {
     this.populateFilterCategories();
     this.initChart();
     this.checkCloudStatus();
-    this.fetchTransactions();
+    this.initSession();
     this.initPWA();
     this.updateHeaderDate();
   }
@@ -139,44 +142,28 @@ class StudentExpenseApp {
     this.views = {
       dashboard: document.getElementById('viewDashboard'),
       add: document.getElementById('viewAdd'),
+      transfer: document.getElementById('viewTransfer'),
       analytics: document.getElementById('viewAnalytics'),
       history: document.getElementById('viewHistory'),
       settings: document.getElementById('viewSettings')
     };
 
-    // Desktop Nav Tabs
+    // Navigation Tabs
     this.navTabs = {
       dashboard: document.getElementById('navTabDashboard'),
       add: document.getElementById('navTabAdd'),
+      transfer: document.getElementById('navTabTransfer'),
       analytics: document.getElementById('navTabAnalytics'),
       history: document.getElementById('navTabHistory'),
       settings: document.getElementById('navTabSettings')
     };
 
-    // Mobile Bottom Nav Buttons
-    this.mobileNavBtns = {
-      dashboard: document.getElementById('mobileNavDashboard'),
-      analytics: document.getElementById('mobileNavAnalytics'),
-      history: document.getElementById('mobileNavHistory'),
-      settings: document.getElementById('mobileNavSettings')
-    };
-
-    // Dashboard Metric Elements
-    this.statTotalBalance = document.getElementById('statTotalBalance');
+    // Home Page Balance Cards (The 3 cards requested)
     this.statUpiBalance = document.getElementById('statUpiBalance');
     this.statCashBalance = document.getElementById('statCashBalance');
-    this.statTotalSpent = document.getElementById('statTotalSpent');
     this.statPocketMoneyTotal = document.getElementById('statPocketMoneyTotal');
-    this.statPocketMoneyRemaining = document.getElementById('statPocketMoneyRemaining');
-    this.spendRatioText = document.getElementById('spendRatioText');
-    this.budgetProgressBar = document.getElementById('budgetProgressBar');
-    this.recentTransactionsList = document.getElementById('recentTransactionsList');
 
     // Record / Add Form Elements
-    this.subtabExpenseForm = document.getElementById('subtabExpenseForm');
-    this.subtabTransferForm = document.getElementById('subtabTransferForm');
-    this.addTabExpenseBtn = document.getElementById('addTabExpenseBtn');
-    this.addTabTransferBtn = document.getElementById('addTabTransferBtn');
     this.transactionForm = document.getElementById('transactionForm');
     this.btnTypeExpense = document.getElementById('btnTypeExpense');
     this.btnTypeIncome = document.getElementById('btnTypeIncome');
@@ -215,7 +202,7 @@ class StudentExpenseApp {
     this.chartViewBar = document.getElementById('chartViewBar');
     this.exportCsvBtn = document.getElementById('exportCsvBtn');
 
-    // History Passbook Elements
+    // Passbook History Elements
     this.searchInput = document.getElementById('searchInput');
     this.clearSearchBtn = document.getElementById('clearSearchBtn');
     this.tabFilterAll = document.getElementById('tabFilterAll');
@@ -254,7 +241,7 @@ class StudentExpenseApp {
     this.authErrorMsg = document.getElementById('authErrorMsg');
     this.continueGuestBtn = document.getElementById('continueGuestBtn');
 
-    // Header & Global Elements
+    // Global
     this.cloudStatusBadge = document.getElementById('cloudStatusBadge');
     this.cloudStatusDot = document.getElementById('cloudStatusDot');
     this.cloudStatusText = document.getElementById('cloudStatusText');
@@ -265,7 +252,7 @@ class StudentExpenseApp {
     this.themeIcon = document.getElementById('themeIcon');
     this.toastContainer = document.getElementById('toastContainer');
 
-    // PWA Elements
+    // PWA
     this.installAppBtn = document.getElementById('installAppBtn');
     this.installModal = document.getElementById('installModal');
     this.installModalContent = document.getElementById('installModalContent');
@@ -277,14 +264,36 @@ class StudentExpenseApp {
   }
 
   // ==========================================
-  // SPA MULTI-VIEW SWITCHER
+  // SESSION & INSTANT ACCESS
+  // ==========================================
+  async initSession() {
+    if (!this.token) {
+      try {
+        const res = await fetch('/api/auth/auto-login', { method: 'POST' });
+        const data = await res.json();
+        if (data.success && data.token) {
+          this.token = data.token;
+          this.user = data.user;
+          localStorage.setItem('pt_jwt_token', this.token);
+          localStorage.setItem('pt_user', JSON.stringify(this.user));
+          this.updateUserUI();
+        }
+      } catch (e) {
+        console.warn('Auto-login notice:', e);
+      }
+    }
+    this.fetchTransactions();
+  }
+
+  // ==========================================
+  // SPA MULTI-VIEW NAVIGATION
   // ==========================================
   switchView(viewName, options = {}) {
     if (!this.views[viewName]) return;
     this.currentView = viewName;
     this.sound.playPop();
 
-    // Toggle active view container
+    // Show only the selected view
     Object.keys(this.views).forEach((key) => {
       const el = this.views[key];
       if (el) {
@@ -298,65 +307,35 @@ class StudentExpenseApp {
       }
     });
 
-    // Update Desktop Nav Tabs
+    // Update Top Navigation Tabs
     Object.keys(this.navTabs).forEach((key) => {
       const tab = this.navTabs[key];
       if (tab) {
         if (key === viewName) {
-          tab.className = 'px-3.5 py-1.5 rounded-xl border border-transparent transition flex items-center gap-2 nav-tab-active font-extrabold shadow-sm';
+          tab.className = 'px-3.5 py-1.5 rounded-xl border border-transparent transition flex items-center gap-2 nav-tab-active font-extrabold whitespace-nowrap shadow-sm';
         } else {
-          tab.className = 'px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 font-bold';
+          tab.className = 'px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold';
         }
       }
     });
 
-    // Update Mobile Nav Buttons
-    Object.keys(this.mobileNavBtns).forEach((key) => {
-      const btn = this.mobileNavBtns[key];
-      if (btn) {
-        if (key === viewName) {
-          btn.classList.add('mobile-nav-active');
-        } else {
-          btn.classList.remove('mobile-nav-active');
-        }
-      }
-    });
-
-    // Handle View-Specific Options
+    // Handle view-specific initializations
     if (viewName === 'add') {
-      if (options.subtab === 'transfer') {
-        this.switchAddSubtab('transfer');
-      } else {
-        this.switchAddSubtab('expense');
-        if (options.type) this.setType(options.type);
-      }
+      if (options.type) this.setType(options.type);
       this.setDefaultDate();
+    } else if (viewName === 'transfer') {
+      if (this.transferAmount) this.transferAmount.focus();
     } else if (viewName === 'analytics') {
       this.renderChart();
     } else if (viewName === 'history') {
       this.renderHistoryList();
     }
 
-    // Scroll window smoothly to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  switchAddSubtab(tabName) {
-    if (tabName === 'transfer') {
-      if (this.subtabExpenseForm) this.subtabExpenseForm.classList.add('hidden');
-      if (this.subtabTransferForm) this.subtabTransferForm.classList.remove('hidden');
-      if (this.addTabTransferBtn) this.addTabTransferBtn.className = 'px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition';
-      if (this.addTabExpenseBtn) this.addTabExpenseBtn.className = 'px-3 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
-    } else {
-      if (this.subtabTransferForm) this.subtabTransferForm.classList.add('hidden');
-      if (this.subtabExpenseForm) this.subtabExpenseForm.classList.remove('hidden');
-      if (this.addTabExpenseBtn) this.addTabExpenseBtn.className = 'px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition';
-      if (this.addTabTransferBtn) this.addTabTransferBtn.className = 'px-3 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
-    }
-  }
-
   // ==========================================
-  // AUTHENTICATION & USER MANAGEMENT
+  // AUTHENTICATION MODAL
   // ==========================================
   openAuthModal(mode = 'login') {
     this.authMode = mode;
@@ -404,7 +383,7 @@ class StudentExpenseApp {
     const name = this.authName ? this.authName.value.trim() : '';
 
     if (!email || !password) {
-      this.showAuthError('Please provide both email and password.');
+      this.showAuthError('Please enter both email and password.');
       return;
     }
 
@@ -430,18 +409,12 @@ class StudentExpenseApp {
         localStorage.setItem('pt_jwt_token', this.token);
         localStorage.setItem('pt_user', JSON.stringify(this.user));
 
-        if (this.user.defaultCurrency) {
-          this.currency = this.user.defaultCurrency;
-          localStorage.setItem('pt_currency', this.currency);
-        }
-
         this.updateUserUI();
         this.closeAuthModal();
         this.sound.playSuccess();
-        confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
-        this.showToast(data.message || `Welcome, ${this.user.name}!`, 'success');
+        confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+        this.showToast(`Logged in as ${this.user.name}! Permanent sync ready.`, 'success');
 
-        // Immediately fetch user's permanent transactions from MongoDB
         this.fetchTransactions();
       } else {
         this.showAuthError(data.error || 'Authentication failed.');
@@ -458,48 +431,18 @@ class StudentExpenseApp {
     }
   }
 
-  logout() {
-    this.token = null;
-    this.user = null;
-    localStorage.removeItem('pt_jwt_token');
-    localStorage.removeItem('pt_user');
-    this.updateUserUI();
-    this.showToast('You have been logged out. Switched to demo mode.', 'info');
-    this.fetchTransactions();
-  }
-
   updateUserUI() {
-    if (this.user && this.token) {
-      // Logged-in State
-      if (this.userWelcomeText) {
-        this.userWelcomeText.innerHTML = `Welcome back, <strong class="text-brand-600 dark:text-brand-400 font-extrabold">${this.escapeHTML(this.user.name)}</strong>! Cloud data synced permanently.`;
-      }
-      if (this.authBtnText) this.authBtnText.textContent = this.user.name.split(' ')[0];
-      if (this.authBtnIcon) this.authBtnIcon.className = 'fa-solid fa-circle-user text-brand-600 dark:text-brand-400';
-      if (this.settingsUserName) this.settingsUserName.textContent = this.user.name;
-      if (this.settingsUserEmail) this.settingsUserEmail.textContent = this.user.email;
-      if (this.settingsUserAvatarLetter) this.settingsUserAvatarLetter.textContent = (this.user.name[0] || 'U').toUpperCase();
-      if (this.settingsAuthActionBtn) {
-        this.settingsAuthActionBtn.textContent = 'Log Out';
-        this.settingsAuthActionBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition';
-      }
-    } else {
-      // Guest / Demo State
-      if (this.userWelcomeText) {
-        this.userWelcomeText.innerHTML = `Welcome, <strong>Guest</strong>! <span class="underline cursor-pointer font-bold text-brand-600" onclick="window.app.openAuthModal('signup')">Sign up</span> or <span class="underline cursor-pointer font-bold text-brand-600" onclick="window.app.openAuthModal('login')">Log in</span> to save transactions permanently.`;
-      }
-      if (this.authBtnText) this.authBtnText.textContent = 'Sign In';
-      if (this.authBtnIcon) this.authBtnIcon.className = 'fa-solid fa-user-lock';
-      if (this.settingsUserName) this.settingsUserName.textContent = 'Guest User';
-      if (this.settingsUserEmail) this.settingsUserEmail.textContent = 'Running in Local Demo Mode';
-      if (this.settingsUserAvatarLetter) this.settingsUserAvatarLetter.textContent = 'G';
-      if (this.settingsAuthActionBtn) {
-        this.settingsAuthActionBtn.textContent = 'Sign In / Register';
-        this.settingsAuthActionBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white transition';
-      }
-    }
+    const displayName = this.user ? this.user.name : 'Prince';
+    const displayEmail = this.user ? this.user.email : 'princeshrivastva12@gmail.com';
 
-    if (this.activeCurrencyDisplay) this.activeCurrencyDisplay.textContent = `${this.currency}`;
+    if (this.userWelcomeText) {
+      this.userWelcomeText.innerHTML = `Welcome back, <strong class="text-brand-600 dark:text-brand-400 font-extrabold">${this.escapeHTML(displayName)}</strong>! Permanent MongoDB Atlas sync active.`;
+    }
+    if (this.authBtnText) this.authBtnText.textContent = displayName.split(' ')[0];
+    if (this.settingsUserName) this.settingsUserName.textContent = displayName;
+    if (this.settingsUserEmail) this.settingsUserEmail.textContent = displayEmail;
+    if (this.settingsUserAvatarLetter) this.settingsUserAvatarLetter.textContent = (displayName[0] || 'P').toUpperCase();
+    if (this.activeCurrencyDisplay) this.activeCurrencyDisplay.textContent = `${this.currency} (${this.currency === '₹' ? 'INR' : 'USD'})`;
     if (this.currencySelector) this.currencySelector.value = this.currency;
     if (this.amountSymbolPrefix) this.amountSymbolPrefix.textContent = this.currency;
     if (this.transferCurrencyPrefix) this.transferCurrencyPrefix.textContent = this.currency;
@@ -510,41 +453,25 @@ class StudentExpenseApp {
   // ==========================================
   bindEvents() {
     // Theme
-    if (this.themeToggleBtn) {
-      this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
-    }
+    if (this.themeToggleBtn) this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
 
-    // Currency Change
+    // Currency
     if (this.currencySelector) {
-      this.currencySelector.addEventListener('change', async (e) => {
+      this.currencySelector.addEventListener('change', (e) => {
         this.currency = e.target.value;
         localStorage.setItem('pt_currency', this.currency);
         this.updateUserUI();
         this.render();
         this.sound.playPop();
-        this.showToast(`Currency changed to ${this.currency}`, 'info');
-
-        // Persist to user profile if logged in
-        if (this.token) {
-          try {
-            await fetch('/api/auth/profile', {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.token}`
-              },
-              body: JSON.stringify({ defaultCurrency: this.currency })
-            });
-          } catch (e) {}
-        }
+        this.showToast(`Currency set to ${this.currency}`, 'info');
       });
     }
 
-    // Type Switcher in Add Form
+    // Type Switcher
     if (this.btnTypeExpense) this.btnTypeExpense.addEventListener('click', () => { this.setType('expense'); this.sound.playPop(); });
     if (this.btnTypeIncome) this.btnTypeIncome.addEventListener('click', () => { this.setType('income'); this.sound.playPop(); });
 
-    // Account Radios in Add Form
+    // Account Radios
     document.querySelectorAll('input[name="txAccountRadio"]').forEach((radio) => {
       radio.addEventListener('change', (e) => {
         this.setAccount(e.target.value);
@@ -552,7 +479,7 @@ class StudentExpenseApp {
       });
     });
 
-    // Campus Presets Chips
+    // Campus Presets
     document.querySelectorAll('.preset-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
         const { title, amount, cat, acc, type } = chip.dataset;
@@ -615,27 +542,9 @@ class StudentExpenseApp {
     if (this.chartViewBar) this.chartViewBar.addEventListener('click', () => this.setChartView('bar'));
     if (this.exportCsvBtn) this.exportCsvBtn.addEventListener('click', () => this.exportToCSV());
 
-    // Auth Buttons
-    if (this.authBtn) {
-      this.authBtn.addEventListener('click', () => {
-        if (this.user && this.token) {
-          this.switchView('settings');
-        } else {
-          this.openAuthModal('login');
-        }
-      });
-    }
-
-    if (this.settingsAuthActionBtn) {
-      this.settingsAuthActionBtn.addEventListener('click', () => {
-        if (this.user && this.token) {
-          this.logout();
-        } else {
-          this.openAuthModal('login');
-        }
-      });
-    }
-
+    // Auth Modal Triggers
+    if (this.authBtn) this.authBtn.addEventListener('click', () => this.openAuthModal('login'));
+    if (this.settingsAuthActionBtn) this.settingsAuthActionBtn.addEventListener('click', () => this.openAuthModal('login'));
     if (this.tabAuthLogin) this.tabAuthLogin.addEventListener('click', () => { this.authMode = 'login'; this.updateAuthModalUI(); });
     if (this.tabAuthSignup) this.tabAuthSignup.addEventListener('click', () => { this.authMode = 'signup'; this.updateAuthModalUI(); });
     if (this.closeAuthModalBtn) this.closeAuthModalBtn.addEventListener('click', () => this.closeAuthModal());
@@ -649,24 +558,18 @@ class StudentExpenseApp {
         this.switchView('history');
         if (this.searchInput) this.searchInput.focus();
       } else if (e.key === 'Escape') {
-        if (this.authModal && !this.authModal.classList.contains('hidden')) {
-          this.closeAuthModal();
-        }
-        if (this.installModal && !this.installModal.classList.contains('hidden')) {
-          this.closeInstallModal();
-        }
+        if (this.authModal && !this.authModal.classList.contains('hidden')) this.closeAuthModal();
+        if (this.installModal && !this.installModal.classList.contains('hidden')) this.closeInstallModal();
       }
     });
   }
 
   // ==========================================
-  // API CLIENT (WITH JWT AUTHORIZATION)
+  // API CLIENT
   // ==========================================
   getAuthHeaders() {
     const headers = { 'Content-Type': 'application/json' };
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
-    }
+    if (this.token) headers['Authorization'] = `Bearer ${this.token}`;
     return headers;
   }
 
@@ -674,14 +577,12 @@ class StudentExpenseApp {
     try {
       const res = await fetch('/api/status');
       const data = await res.json();
-      if (data.connected) {
-        if (this.cloudStatusBadge) this.cloudStatusBadge.className = 'hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80 transition';
+      if (data.connected && this.cloudStatusBadge) {
+        this.cloudStatusBadge.className = 'flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80 transition';
         if (this.cloudStatusDot) this.cloudStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500 live-indicator';
         if (this.cloudStatusText) this.cloudStatusText.textContent = 'MongoDB Atlas';
       }
-    } catch (e) {
-      console.warn('Backend status check failed:', e);
-    }
+    } catch (e) {}
   }
 
   async fetchTransactions() {
@@ -694,11 +595,7 @@ class StudentExpenseApp {
         this.render();
       }
     } catch (e) {
-      console.warn('Falling back to local cache:', e);
-      const saved = localStorage.getItem('pt_local_txs');
-      this.transactions = saved ? JSON.parse(saved) : [];
-      this.summary = this.calculateLocalSummary(this.transactions);
-      this.render();
+      console.warn('Network notice:', e);
     }
   }
 
@@ -732,7 +629,7 @@ class StudentExpenseApp {
         this.setDefaultDate();
         this.render();
 
-        const toastMsg = type === 'income' ? `Pocket Money logged to ${account}! 🎉` : `Expense logged from ${account}`;
+        const toastMsg = type === 'income' ? `Pocket Money added to ${account}! 🎉` : `Expense logged from ${account}`;
         this.showToast(toastMsg, 'success');
         if (type === 'income') {
           this.sound.playSuccess();
@@ -741,8 +638,8 @@ class StudentExpenseApp {
           this.sound.playPop();
         }
 
-        // Return to Dashboard so user sees live update
-        setTimeout(() => this.switchView('dashboard'), 400);
+        // Return smoothly to the clean Home page showing updated balances
+        setTimeout(() => this.switchView('dashboard'), 350);
       } else {
         this.showToast(data.error || 'Failed to save transaction', 'error');
       }
@@ -783,7 +680,7 @@ class StudentExpenseApp {
         this.render();
         this.sound.playSuccess();
         this.showToast(`Transferred ${this.currency}${amount} from ${fromAccount} to ${toAccount} 🔄`, 'success');
-        setTimeout(() => this.switchView('dashboard'), 400);
+        setTimeout(() => this.switchView('dashboard'), 350);
       } else {
         this.showToast(data.error || 'Transfer failed', 'error');
       }
@@ -817,11 +714,10 @@ class StudentExpenseApp {
   }
 
   // ==========================================
-  // RENDERING & UI UPDATES
+  // RENDERING
   // ==========================================
   render() {
-    this.renderDashboardCards();
-    this.renderRecentList();
+    this.renderHomeBalances();
     this.renderHistoryList();
     this.renderChart();
   }
@@ -831,38 +727,12 @@ class StudentExpenseApp {
     return `${this.currency}${num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  renderDashboardCards() {
-    const { upiBalance, cashBalance, totalBalance, totalSpent, totalPocketMoney, remainingPocketMoney, spendRatio } = this.summary;
-
-    if (this.statTotalBalance) this.statTotalBalance.textContent = this.formatCurrency(totalBalance);
+  // HOME PAGE: ONLY SHOWS UPI, CASH & TOTAL POCKET MONEY
+  renderHomeBalances() {
+    const { upiBalance, cashBalance, totalPocketMoney } = this.summary;
     if (this.statUpiBalance) this.statUpiBalance.textContent = this.formatCurrency(upiBalance);
     if (this.statCashBalance) this.statCashBalance.textContent = this.formatCurrency(cashBalance);
-    if (this.statTotalSpent) this.statTotalSpent.textContent = this.formatCurrency(totalSpent);
     if (this.statPocketMoneyTotal) this.statPocketMoneyTotal.textContent = this.formatCurrency(totalPocketMoney);
-    if (this.statPocketMoneyRemaining) this.statPocketMoneyRemaining.textContent = this.formatCurrency(remainingPocketMoney);
-    if (this.spendRatioText) this.spendRatioText.textContent = `${spendRatio}%`;
-
-    if (this.budgetProgressBar) {
-      const pct = Math.min(Math.max(spendRatio, 0), 100);
-      this.budgetProgressBar.style.width = `${pct}%`;
-    }
-  }
-
-  renderRecentList() {
-    if (!this.recentTransactionsList) return;
-    const recent = this.transactions.slice(0, 4);
-
-    if (recent.length === 0) {
-      this.recentTransactionsList.innerHTML = `
-        <div class="py-6 text-center text-xs text-slate-400">
-          <p>No recent activity. Start by logging your first expense or pocket money!</p>
-          <button onclick="window.app.switchView('add')" class="mt-2 text-brand-600 font-bold hover:underline">+ Record Transaction</button>
-        </div>
-      `;
-      return;
-    }
-
-    this.recentTransactionsList.innerHTML = recent.map((t) => this.renderTransactionItemHTML(t)).join('');
   }
 
   renderHistoryList() {
@@ -970,15 +840,7 @@ class StudentExpenseApp {
     const ctx = this.expenseChartCanvas.getContext('2d');
     this.chart = new Chart(ctx, {
       type: 'doughnut',
-      data: {
-        labels: [],
-        datasets: [{
-          data: [],
-          backgroundColor: [],
-          borderWidth: 2,
-          hoverOffset: 6
-        }]
-      },
+      data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
       options: {
         responsive: true,
         maintainAspectRatio: false,
@@ -1040,12 +902,11 @@ class StudentExpenseApp {
     this.chart.data.datasets[0].backgroundColor = colors;
     this.chart.update();
 
-    // Render Category Leaderboard
     const sorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
     if (this.categoryLeaderboard) {
       this.categoryLeaderboard.innerHTML = sorted.map(([cat, amt]) => {
         const pct = total > 0 ? ((amt / total) * 100).toFixed(1) : 0;
-        const meta = CATEGORIES.expense.find((c) => c.id === cat) || { icon: 'fa-tag', color: '#6366f1', bg: 'bg-indigo-500/10 text-brand-600' };
+        const meta = CATEGORIES.expense.find((c) => c.id === cat) || { icon: 'fa-tag', color: '#6366f1' };
 
         return `
           <div class="space-y-1">
@@ -1132,19 +993,19 @@ class StudentExpenseApp {
   }
 
   // ==========================================
-  // HELPERS & FORM HANDLING
+  // HELPERS
   // ==========================================
   setType(type) {
     if (this.txType) this.txType.value = type;
     if (type === 'expense') {
       if (this.btnTypeExpense) this.btnTypeExpense.className = 'py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 bg-rose-600 text-white shadow-sm shadow-rose-600/30';
       if (this.btnTypeIncome) this.btnTypeIncome.className = 'py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
-      if (this.submitBtn) this.submitBtn.className = 'w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2';
+      if (this.submitBtn) this.submitBtn.className = 'w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2';
       if (this.submitBtnText) this.submitBtnText.textContent = 'Add Expense';
     } else {
       if (this.btnTypeIncome) this.btnTypeIncome.className = 'py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-sm shadow-emerald-600/30';
       if (this.btnTypeExpense) this.btnTypeExpense.className = 'py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
-      if (this.submitBtn) this.submitBtn.className = 'w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-lg shadow-emerald-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2';
+      if (this.submitBtn) this.submitBtn.className = 'w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-lg shadow-emerald-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2';
       if (this.submitBtnText) this.submitBtnText.textContent = 'Add Pocket Money';
     }
     this.populateCategoryOptions(type);
@@ -1172,7 +1033,7 @@ class StudentExpenseApp {
     if (this.txTitle) this.txTitle.value = title;
     if (this.txAmount) this.txAmount.value = amount;
     if (this.txCategory) this.txCategory.value = cat;
-    this.showToast(`Filled preset: ${title} (${this.currency}${amount})`, 'info');
+    this.showToast(`Preset: ${title} (${this.currency}${amount})`, 'info');
   }
 
   populateCategoryOptions(type) {
@@ -1251,7 +1112,7 @@ class StudentExpenseApp {
 
     window.addEventListener('appinstalled', () => {
       this.deferredInstallPrompt = null;
-      this.showToast('PocketTrack installed successfully as an App! 🎉', 'success');
+      this.showToast('PocketTrack installed as an App! 🎉', 'success');
       if (this.installAppBtn) {
         this.installAppBtn.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-300"></i> <span class="hidden sm:inline">Installed</span>';
         this.installAppBtn.classList.remove('animate-pulse');
@@ -1318,7 +1179,7 @@ class StudentExpenseApp {
       const choice = await this.deferredInstallPrompt.userChoice;
       if (choice.outcome === 'accepted') {
         this.sound.playSuccess();
-        this.showToast('PocketTrack installation accepted! 🚀', 'success');
+        this.showToast('PocketTrack app installed! 🚀', 'success');
       }
       this.deferredInstallPrompt = null;
       this.closeInstallModal();
@@ -1328,7 +1189,7 @@ class StudentExpenseApp {
   }
 
   // ==========================================
-  // TOAST & UTILITIES
+  // UTILITIES
   // ==========================================
   escapeHTML(str) {
     if (!str) return '';

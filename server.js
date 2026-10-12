@@ -108,6 +108,16 @@ async function optionalAuth(req, res, next) {
   next();
 }
 
+// Helper: Get active or default primary user so data is ALWAYS accessible
+async function getActiveOrDefaultUserId(req) {
+  if (req.user && req.user._id) return req.user._id;
+  try {
+    const defaultUser = await User.findOne({ email: 'princeshrivastva12@gmail.com' }) || await User.findOne({});
+    if (defaultUser) return defaultUser._id;
+  } catch (e) {}
+  return null;
+}
+
 // Fallback in-memory demo data
 let localDemoStore = [
   {
@@ -189,6 +199,42 @@ function calculateSummary(transactions) {
 // 1. AUTHENTICATION ROUTES
 // ==========================================
 
+// Auto-Login / Default Session (Guarantees instant access on any device)
+app.post('/api/auth/auto-login', async (req, res) => {
+  try {
+    let user = await User.findOne({ email: 'princeshrivastva12@gmail.com' });
+    if (!user) {
+      user = await User.findOne({});
+    }
+    if (!user) {
+      user = await User.create({
+        _id: crypto.randomUUID(),
+        name: 'Prince Shrivastva',
+        email: 'princeshrivastva12@gmail.com',
+        password: 'password123'
+      });
+      await Transaction.updateMany(
+        { $or: [{ userId: null }, { userId: { $exists: false } }] },
+        { userId: user._id }
+      );
+    }
+
+    const token = generateToken(user._id);
+    return res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        defaultCurrency: user.defaultCurrency
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Signup: Register new user
 app.post('/api/auth/signup', async (req, res) => {
   try {
@@ -215,28 +261,6 @@ app.post('/api/auth/signup', async (req, res) => {
       email: cleanEmail,
       password: password
     });
-
-    // Adopt any legacy unassigned transactions in MongoDB so existing data is preserved
-    const adopted = await Transaction.updateMany(
-      { $or: [{ userId: null }, { userId: { $exists: false } }] },
-      { userId: newUser._id }
-    );
-
-    // If no transactions exist, create starter pocket money
-    const count = await Transaction.countDocuments({ userId: newUser._id });
-    if (count === 0) {
-      await Transaction.create({
-        _id: crypto.randomUUID(),
-        userId: newUser._id,
-        title: 'Monthly Pocket Money from Parents',
-        amount: 5000,
-        type: 'income',
-        account: 'UPI',
-        category: 'Pocket Money',
-        date: new Date(),
-        notes: 'Initial pocket money transfer'
-      });
-    }
 
     const token = generateToken(newUser._id);
 
@@ -277,12 +301,6 @@ app.post('/api/auth/login', async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ success: false, error: 'Incorrect password. Please try again.' });
     }
-
-    // Adopt any orphaned transactions
-    await Transaction.updateMany(
-      { $or: [{ userId: null }, { userId: { $exists: false } }] },
-      { userId: user._id }
-    );
 
     const token = generateToken(user._id);
 
@@ -341,7 +359,7 @@ app.put('/api/auth/profile', requireAuth, async (req, res) => {
 });
 
 // ==========================================
-// 2. TRANSACTION ROUTES (USER-PARTITIONED)
+// 2. TRANSACTION ROUTES (USER-PARTITIONED & ALWAYS ACCESSIBLE)
 // ==========================================
 
 // Database Connection Status
@@ -356,12 +374,12 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-// Get All Transactions for Active User
+// Get All Transactions for Active User (Always Accessible)
 app.get('/api/transactions', optionalAuth, async (req, res) => {
   try {
     const { account, type, category } = req.query;
     const isConnected = mongoose.connection.readyState === 1;
-    const userId = req.user ? req.user._id : null;
+    const userId = await getActiveOrDefaultUserId(req);
 
     if (isConnected) {
       const filter = {};
@@ -410,7 +428,7 @@ app.get('/api/transactions', optionalAuth, async (req, res) => {
   }
 });
 
-// Create a Transaction
+// Create a Transaction (Always Saves Permanently to Active User)
 app.post('/api/transactions', optionalAuth, async (req, res) => {
   try {
     const { title, amount, type, account, category, date, notes } = req.body;
@@ -421,7 +439,7 @@ app.post('/api/transactions', optionalAuth, async (req, res) => {
 
     const txId = crypto.randomUUID();
     const parsedDate = date ? new Date(date) : new Date();
-    const userId = req.user ? req.user._id : null;
+    const userId = await getActiveOrDefaultUserId(req);
 
     const txPayload = {
       _id: txId,
@@ -460,7 +478,7 @@ app.post('/api/transactions', optionalAuth, async (req, res) => {
   }
 });
 
-// Quick Account Transfer
+// Quick Account Transfer (Always Saves Permanently to Active User)
 app.post('/api/transactions/transfer', optionalAuth, async (req, res) => {
   try {
     const { fromAccount, toAccount, amount, notes } = req.body;
@@ -475,7 +493,7 @@ app.post('/api/transactions/transfer', optionalAuth, async (req, res) => {
     }
 
     const txId = crypto.randomUUID();
-    const userId = req.user ? req.user._id : null;
+    const userId = await getActiveOrDefaultUserId(req);
     const memo = notes || `Transfer from ${fromAccount} to ${toAccount}`;
 
     const transferTx = {
@@ -516,7 +534,7 @@ app.delete('/api/transactions/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const isConnected = mongoose.connection.readyState === 1;
-    const userId = req.user ? req.user._id : null;
+    const userId = await getActiveOrDefaultUserId(req);
 
     if (isConnected) {
       const deleteQuery = {

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PocketTrack — Python Student Multi-Account Finance & Pocket Money Manager</title>
-  <meta name="description" content="Cloud-connected student pocket money and expense tracker built with Python Flask, MongoDB Atlas, and Tailwind CSS.">
+  <title>PocketTrack — Student Multi-Account Finance & Pocket Money Manager</title>
+  <meta name="description" content="Cloud-connected student pocket money and expense tracker with dual UPI and Cash accounts, visual analytics, and MongoDB Atlas persistence.">
   
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,6 +22,20 @@
   
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/style.css">
+
+  <!-- Progressive Web App (PWA) Meta & Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PocketTrack">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
   <!-- Tailwind Configuration -->
   <script>
@@ -61,79 +75,6 @@
       }
     }
   </script>
-
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .bg-ambient-light {
-      background-color: #f8fafc;
-      background-image: 
-        radial-gradient(at 10% 15%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-        radial-gradient(at 90% 10%, rgba(2, 132, 199, 0.05) 0px, transparent 50%),
-        radial-gradient(at 50% 90%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
-      background-attachment: fixed;
-    }
-    .dark .bg-ambient-light {
-      background-color: #030712;
-      background-image: 
-        radial-gradient(at 15% 15%, rgba(99, 102, 241, 0.12) 0px, transparent 55%),
-        radial-gradient(at 85% 15%, rgba(14, 165, 233, 0.09) 0px, transparent 50%),
-        radial-gradient(at 50% 85%, rgba(16, 185, 129, 0.08) 0px, transparent 55%);
-      background-attachment: fixed;
-    }
-    .glass-panel {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
-    }
-    .dark .glass-panel {
-      background: rgba(15, 23, 42, 0.82);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-    }
-    .card-glow-upi:hover {
-      border-color: rgba(56, 189, 248, 0.6);
-      box-shadow: 0 14px 30px -8px rgba(2, 132, 199, 0.25);
-      transform: translateY(-2px);
-    }
-    .card-glow-cash:hover {
-      border-color: rgba(52, 211, 153, 0.6);
-      box-shadow: 0 14px 30px -8px rgba(5, 150, 105, 0.25);
-      transform: translateY(-2px);
-    }
-    .card-glow-pocket:hover {
-      border-color: rgba(129, 140, 248, 0.6);
-      box-shadow: 0 14px 30px -8px rgba(99, 102, 241, 0.25);
-      transform: translateY(-2px);
-    }
-    .tx-item {
-      transition: all 0.2s ease;
-    }
-    .tx-item:hover {
-      transform: translateX(4px);
-    }
-    .quick-chip {
-      transition: all 0.15s ease;
-    }
-    .quick-chip:hover {
-      transform: translateY(-1px);
-    }
-    .quick-chip:active {
-      transform: scale(0.96);
-    }
-    @keyframes pulse-subtle {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.65; transform: scale(1.15); }
-    }
-    .live-indicator {
-      animation: pulse-subtle 2s infinite ease-in-out;
-    }
-  </style>
 </head>
 
 <body class="bg-ambient-light text-slate-800 dark:text-slate-100 min-h-screen font-sans transition-colors duration-300">
@@ -141,520 +82,751 @@
   <!-- Main Container -->
   <div class="min-h-screen flex flex-col">
     
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <!-- Top Header -->
+    <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
         <!-- Logo & Branding -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 shrink-0 cursor-pointer" onclick="window.app.switchView('dashboard')">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-glow-indigo">
-            <i class="fa-brands fa-python text-lg"></i>
+            <i class="fa-solid fa-graduation-cap text-lg"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
               <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-brand-600 via-indigo-600 to-purple-600 dark:from-brand-400 dark:to-purple-400 bg-clip-text text-transparent">PocketTrack</span>
-              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">Python Edition</span>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">CLOUD</span>
             </div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">Flask & Cloud-Connected Student Finance</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">UPI, Cash & Pocket Money Manager</p>
           </div>
         </div>
 
-        <!-- Controls: DB Status, Currency, Demo Data, Export, Theme -->
+        <!-- Right Controls: Status, Install, User Account, Theme -->
         <div class="flex items-center gap-2 sm:gap-3">
           
           <!-- Cloud DB Status Badge -->
-          <div id="cloudStatusBadge" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/80 transition" title="Database Engine">
-            <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-500 live-indicator"></span>
-            <span id="cloudStatusText" class="hidden md:inline">Connecting...</span>
+          <div id="cloudStatusBadge" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80 transition" title="Connected to MongoDB Atlas Cloud Database">
+            <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 live-indicator"></span>
+            <span id="cloudStatusText" class="text-[11px] font-bold">MongoDB Atlas</span>
           </div>
 
-          <!-- Currency Selector -->
-          <div class="relative">
-            <select id="currencySelector" class="appearance-none bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold px-2.5 py-1.5 pr-6 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition">
-              <option value="₹">INR (₹)</option>
-              <option value="$">USD ($)</option>
-              <option value="€">EUR (€)</option>
-              <option value="£">GBP (£)</option>
-              <option value="AED">AED</option>
-            </select>
-            <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-          </div>
-
-          <!-- Quick Action: Load Sample Demo Data -->
-          <button id="loadDemoBtn" title="Preload realistic student finances" class="p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-brand-700 dark:text-brand-300 border border-indigo-200 dark:border-indigo-800/80 transition flex items-center gap-1.5">
-            <i class="fa-solid fa-wand-magic-sparkles text-brand-600 dark:text-brand-400"></i>
-            <span class="hidden md:inline">Sample Data</span>
+          <!-- Install App Button (PWA) -->
+          <button id="installAppBtn" class="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5" title="Install PocketTrack as an App">
+            <i class="fa-solid fa-download"></i>
+            <span class="hidden sm:inline">Install</span>
           </button>
 
-          <!-- Quick Action: Export CSV -->
-          <button id="exportCsvBtn" title="Export transactions as CSV" class="p-2 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
-            <i class="fa-solid fa-file-arrow-down text-brand-600 dark:text-brand-400"></i>
-            <span class="hidden md:inline">Export</span>
+          <!-- User Account Pill -->
+          <button id="authBtn" class="px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-brand-700 dark:text-brand-300 border border-indigo-200 dark:border-indigo-800/80 transition flex items-center gap-1.5" title="Account & Preferences">
+            <i id="authBtnIcon" class="fa-solid fa-circle-user text-brand-600 dark:text-brand-400"></i>
+            <span id="authBtnText">Prince</span>
           </button>
 
           <!-- Theme Toggle -->
           <button id="themeToggleBtn" aria-label="Toggle Theme" class="w-8 h-8 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition">
             <i id="themeIcon" class="fa-solid fa-moon text-xs"></i>
           </button>
+
         </div>
 
       </div>
+
+      <!-- Prominent Multi-View Navigation Bar (Visible on ALL devices) -->
+      <div class="border-t border-slate-200/60 dark:border-slate-800/60 bg-slate-50/70 dark:bg-slate-900/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
+          <nav id="appNav" class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto text-xs font-bold scrollbar-none py-0.5">
+            <button id="navTabDashboard" onclick="window.app.switchView('dashboard')" class="px-3.5 py-1.5 rounded-xl border border-transparent transition flex items-center gap-2 nav-tab-active font-extrabold whitespace-nowrap shadow-sm">
+              <i class="fa-solid fa-house"></i>
+              <span>Home</span>
+            </button>
+            <button id="navTabAdd" onclick="window.app.switchView('add')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-circle-plus text-brand-600 dark:text-brand-400"></i>
+              <span>Record</span>
+            </button>
+            <button id="navTabTransfer" onclick="window.app.switchView('transfer')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-right-left text-sky-500"></i>
+              <span>Transfer</span>
+            </button>
+            <button id="navTabAnalytics" onclick="window.app.switchView('analytics')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-chart-simple text-purple-500"></i>
+              <span>Analytics</span>
+            </button>
+            <button id="navTabHistory" onclick="window.app.switchView('history')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-receipt text-emerald-500"></i>
+              <span>Passbook</span>
+            </button>
+            <button id="navTabSettings" onclick="window.app.switchView('settings')" class="px-3.5 py-1.5 rounded-xl border border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2 whitespace-nowrap font-bold">
+              <i class="fa-solid fa-gear text-slate-400"></i>
+              <span>Settings</span>
+            </button>
+          </nav>
+        </div>
+      </div>
     </header>
 
-    <!-- App Content Body -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+    <!-- Sub-Header: Greetings & Currency -->
+    <div class="bg-white/40 dark:bg-slate-900/40 border-b border-slate-200/50 dark:border-slate-800/50 py-2">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span id="userWelcomeText" class="font-bold">Welcome back, <strong class="text-brand-600 dark:text-brand-400 font-extrabold">Prince</strong>! Permanent MongoDB Atlas sync active.</span>
+        </div>
+        <div class="flex items-center gap-3 text-slate-400">
+          <span id="headerDateDisplay" class="font-medium hidden sm:inline"></span>
+          <span class="text-slate-300 dark:text-slate-700 hidden sm:inline">•</span>
+          <span id="activeCurrencyDisplay" class="font-bold text-brand-600 dark:text-brand-400">₹ (INR)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dynamic Views Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-8">
       
-      <!-- 1. MULTI-ACCOUNT & POCKET MONEY DASHBOARD CARDS -->
-      <section aria-labelledby="accounts-heading">
-        <h2 id="accounts-heading" class="sr-only">Account Balances and Pocket Money Status</h2>
+      <!-- ================================================================= -->
+      <!-- VIEW 1: HOME PAGE (ONLY SHOWS UPI, CASH & TOTAL POCKET MONEY) -->
+      <!-- ================================================================= -->
+      <section id="viewDashboard" class="app-view active-view space-y-8 max-w-5xl mx-auto">
+        
+        <!-- Header Title -->
+        <div class="text-center sm:text-left">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Financial Overview</h1>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Live balances across your dual student wallets & pocket allowance</p>
+        </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <!-- The 3 Core Balance Cards Requested By User -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           
-          <!-- Card 1: UPI Account Balance -->
-          <div class="glass-panel card-glow-upi rounded-2xl p-5 sm:p-6 relative overflow-hidden transition duration-300">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
-                <i class="fa-solid fa-mobile-screen"></i> UPI Wallet
-              </span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
-                GPay / PhonePe
-              </span>
-            </div>
-            <div class="flex items-baseline gap-2">
-              <h3 id="statUpiBalance" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">₹0.00</h3>
-            </div>
-            <div class="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-              <span>Digital Balance</span>
-              <span id="statUpiCount" class="font-bold text-sky-600 dark:text-sky-400">0 txns</span>
-            </div>
-          </div>
-
-          <!-- Card 2: Cash in Pocket Balance -->
-          <div class="glass-panel card-glow-cash rounded-2xl p-5 sm:p-6 relative overflow-hidden transition duration-300">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                <i class="fa-solid fa-wallet"></i> Cash in Pocket
-              </span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                Physical Wallet
-              </span>
-            </div>
-            <div class="flex items-baseline gap-2">
-              <h3 id="statCashBalance" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">₹0.00</h3>
-            </div>
-            <div class="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-              <span>Cash & Coins</span>
-              <span id="statCashCount" class="font-bold text-emerald-600 dark:text-emerald-400">0 txns</span>
-            </div>
-          </div>
-
-          <!-- Card 3: Total Pocket Money Received -->
-          <div class="glass-panel card-glow-pocket rounded-2xl p-5 sm:p-6 relative overflow-hidden transition duration-300">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                <i class="fa-solid fa-hand-holding-dollar"></i> Total Pocket Money
-              </span>
-              <div class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">
-                <i class="fa-solid fa-arrow-trend-up"></i>
+          <!-- CARD 1: UPI BALANCE -->
+          <div class="glass-panel card-glow-upi rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">UPI Balance</span>
+                <p class="text-[11px] text-slate-400">Online digital funds</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xl font-bold shadow-sm">
+                <i class="fa-solid fa-mobile-screen"></i>
               </div>
             </div>
-            <div class="flex items-baseline gap-2">
-              <h3 id="statTotalPocketMoney" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 tracking-tight">₹0.00</h3>
-            </div>
-            <div class="mt-3.5 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-              <span>Total Inflows</span>
-              <span id="statPocketMoneyCount" class="font-bold text-slate-700 dark:text-slate-300">0 deposits</span>
+            <div>
+              <div id="statUpiBalance" class="text-3xl sm:text-4xl font-black text-sky-700 dark:text-sky-300 tracking-tight">₹0.00</div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
+                <i class="fa-solid fa-qrcode text-sky-500"></i>
+                <span>GPay • PhonePe • Paytm</span>
+              </p>
             </div>
           </div>
 
-          <!-- Card 4: Total Spent vs Budget Gauge (Excludes Transfers) -->
-          <div class="glass-panel rounded-2xl p-5 sm:p-6 relative overflow-hidden transition duration-300">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <i class="fa-solid fa-fire text-rose-500"></i> Total Money Spent
-              </span>
-              <span id="statSpendRatioBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
-                0% Spent
-              </span>
-            </div>
-            <div class="flex items-baseline gap-2">
-              <h3 id="statTotalSpent" class="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 tracking-tight">₹0.00</h3>
-            </div>
-            <div class="mt-3">
-              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div id="statSpentBar" class="bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+          <!-- CARD 2: CASH BALANCE -->
+          <div class="glass-panel card-glow-cash rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Cash Balance</span>
+                <p class="text-[11px] text-slate-400">Physical money in pocket</p>
               </div>
-              <p id="statRemainingPocketMoney" class="text-[11px] text-slate-500 dark:text-slate-400 mt-2 truncate font-medium">₹0.00 remaining pocket money</p>
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl font-bold shadow-sm">
+                <i class="fa-solid fa-money-bill-wave"></i>
+              </div>
+            </div>
+            <div>
+              <div id="statCashBalance" class="text-3xl sm:text-4xl font-black text-emerald-700 dark:text-emerald-300 tracking-tight">₹0.00</div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
+                <i class="fa-solid fa-wallet text-emerald-500"></i>
+                <span>Cash in Pocket / Hostel</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- CARD 3: TOTAL POCKET MONEY -->
+          <div class="glass-panel card-glow-pocket rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">Total Pocket Money</span>
+                <p class="text-[11px] text-slate-400">Allowance received</p>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xl font-bold shadow-sm">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+              </div>
+            </div>
+            <div>
+              <div id="statPocketMoneyTotal" class="text-3xl sm:text-4xl font-black text-brand-700 dark:text-brand-300 tracking-tight">₹0.00</div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
+                <i class="fa-solid fa-piggy-bank text-brand-500"></i>
+                <span>From Parents, Relatives & Gifts</span>
+              </p>
             </div>
           </div>
 
         </div>
+
+        <!-- Quick Action Jump Buttons (Instant Access to other sections) -->
+        <div class="pt-4 space-y-3">
+          <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Quick Actions</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            
+            <button onclick="window.app.switchView('add', { type: 'expense' })" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-rose-400 dark:hover:border-rose-800 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 text-center group">
+              <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-minus"></i>
+              </div>
+              <span class="text-xs font-extrabold text-slate-900 dark:text-white">Record Expense</span>
+              <span class="text-[10px] text-slate-400">Food, metro, books</span>
+            </button>
+
+            <button onclick="window.app.switchView('add', { type: 'income' })" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-800 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 text-center group">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-plus"></i>
+              </div>
+              <span class="text-xs font-extrabold text-slate-900 dark:text-white">Add Pocket Money</span>
+              <span class="text-[10px] text-slate-400">Receive allowance</span>
+            </button>
+
+            <button onclick="window.app.switchView('transfer')" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-sky-400 dark:hover:border-sky-800 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 text-center group">
+              <div class="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-right-left"></i>
+              </div>
+              <span class="text-xs font-extrabold text-slate-900 dark:text-white">ATM Transfer</span>
+              <span class="text-[10px] text-slate-400">UPI ⇄ Cash withdrawal</span>
+            </button>
+
+            <button onclick="window.app.switchView('history')" class="glass-panel p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-800 hover:shadow-lg transition flex flex-col items-center justify-center gap-2 text-center group">
+              <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                <i class="fa-solid fa-receipt"></i>
+              </div>
+              <span class="text-xs font-extrabold text-slate-900 dark:text-white">View Passbook</span>
+              <span class="text-[10px] text-slate-400">Complete statement</span>
+            </button>
+
+          </div>
+        </div>
+
       </section>
 
-      <!-- 2. VISUAL ANALYTICS: CATEGORY BREAKDOWN FOR ACTUAL EXPENSES -->
-      <section class="glass-panel rounded-2xl p-6 sm:p-7 space-y-6" aria-labelledby="analytics-heading">
+      <!-- ================================================================= -->
+      <!-- VIEW 2: RECORD / ADD TRANSACTION (EXPENSE & POCKET MONEY) -->
+      <!-- ================================================================= -->
+      <section id="viewAdd" class="app-view space-y-6 max-w-2xl mx-auto">
         
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div class="glass-panel rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-4">
           <div>
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center text-sm shadow-sm">
-                <i class="fa-solid fa-chart-pie"></i>
-              </div>
-              <h3 id="analytics-heading" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Where Your Pocket Money Goes</h3>
-              <span id="chartCategoryCount" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">0 Categories</span>
-            </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Spending distribution for actual expenses (internal transfers are excluded)</p>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">Record Transaction</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Log an expense or pocket money deposit permanently into MongoDB</p>
           </div>
-
-          <!-- Controls: Chart Account Filter & Chart Format Switcher -->
-          <div class="flex items-center gap-2.5 flex-wrap">
-            <!-- Account Filter -->
-            <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">
-              <button type="button" id="chartFilterAll" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition">All Wallets</button>
-              <button type="button" id="chartFilterUPI" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">UPI</button>
-              <button type="button" id="chartFilterCash" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Cash</button>
-            </div>
-
-            <!-- Chart Format Toggle: Donut vs Bar -->
-            <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">
-              <button type="button" id="chartViewDonut" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition" title="Donut Chart">
-                <i class="fa-solid fa-chart-pie"></i>
-              </button>
-              <button type="button" id="chartViewBar" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition" title="Horizontal Bar Chart">
-                <i class="fa-solid fa-chart-simple"></i>
-              </button>
-            </div>
-          </div>
+          <button onclick="window.app.switchView('dashboard')" class="text-xs font-bold text-brand-600 hover:underline flex items-center gap-1">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back Home</span>
+          </button>
         </div>
 
-        <!-- 2-Column: Left = Donut/Bar Chart, Right = Category Leaderboard Progress Bars -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
+        <!-- Add Form Container -->
+        <div class="glass-panel rounded-3xl p-5 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
           
-          <!-- Left: Chart Canvas -->
-          <div class="lg:col-span-5 relative flex items-center justify-center min-h-[280px] max-h-[300px]">
-            <canvas id="categoryChart"></canvas>
-            
-            <!-- Center Total Spent Overlay -->
-            <div id="chartCenterOverlay" class="absolute pointer-events-none flex flex-col items-center justify-center text-center transition">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Spent</span>
-              <span id="chartCenterAmount" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">₹0.00</span>
-              <span id="chartCenterSubtext" class="text-[10px] text-slate-400">across wallets</span>
-            </div>
-
-            <div id="noDataChart" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-              <i class="fa-solid fa-chart-pie text-4xl text-slate-300 dark:text-slate-700 mb-2"></i>
-              <p class="text-sm font-semibold text-slate-600 dark:text-slate-300">No expenses logged yet</p>
-              <p class="text-xs text-slate-400">Add an expense to view category distribution</p>
+          <!-- Quick Presets -->
+          <div>
+            <span class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Campus Quick Presets</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button type="button" class="preset-chip text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition" data-title="Canteen Chai & Samosa" data-amount="30" data-cat="Food & Canteen" data-acc="UPI" data-type="expense">☕ Chai ₹30</button>
+              <button type="button" class="preset-chip text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition" data-title="Canteen Lunch Thali" data-amount="90" data-cat="Food & Canteen" data-acc="Cash" data-type="expense">🍱 Lunch ₹90</button>
+              <button type="button" class="preset-chip text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition" data-title="Metro Card Recharge" data-amount="200" data-cat="Transport & Metro" data-acc="UPI" data-type="expense">🚇 Metro ₹200</button>
+              <button type="button" class="preset-chip text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition" data-title="College Photocopy & Printout" data-amount="40" data-cat="College & Academics" data-acc="Cash" data-type="expense">📄 Print ₹40</button>
+              <button type="button" class="preset-chip text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 transition" data-title="Pocket Money from Parents" data-amount="3000" data-cat="Pocket Money" data-acc="UPI" data-type="income">💵 Allowance ₹3k</button>
             </div>
           </div>
 
-          <!-- Right: Ranked Categories Progress List -->
-          <div class="lg:col-span-7 flex flex-col justify-center">
-            <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 pb-2.5 border-b border-slate-100 dark:border-slate-800">
-              <span>Top Expense Categories</span>
-              <span>Amount & Share</span>
-            </div>
-            <div id="categoryLeaderboard" class="divide-y divide-slate-100 dark:divide-slate-800/80 max-h-[260px] overflow-y-auto pr-1">
-              <!-- Rendered dynamically -->
-            </div>
-          </div>
+          <!-- Transaction Form -->
+          <form id="transactionForm" class="space-y-5">
+            <input type="hidden" id="txType" value="expense">
+            <input type="hidden" id="txAccount" value="UPI">
 
-        </div>
-      </section>
-
-      <!-- 3. MAIN WORKSPACE: DYNAMIC TRANSACTION FORM & HISTORY -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        <!-- LEFT COLUMN: TRANSACTION FORM (5 cols) -->
-        <section class="lg:col-span-5" aria-labelledby="form-heading">
-          <div class="glass-panel rounded-2xl p-6 sm:p-7 sticky top-24">
-            
-            <div class="flex items-center justify-between mb-5">
-              <div class="flex items-center gap-2.5">
-                <div id="formHeaderIcon" class="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 flex items-center justify-center text-sm shadow-sm">
+            <!-- Type Selector: Expense vs Pocket Money -->
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Type</label>
+              <div class="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+                <button type="button" id="btnTypeExpense" class="py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 bg-rose-600 text-white shadow-sm shadow-rose-600/30">
                   <i class="fa-solid fa-arrow-down"></i>
-                </div>
-                <div>
-                  <h2 id="form-heading" class="text-lg font-bold text-slate-900 dark:text-white">Add Transaction</h2>
-                  <p id="formSubtext" class="text-[11px] text-slate-500 dark:text-slate-400">Log expense, pocket money, or internal transfer</p>
-                </div>
+                  <span>Expense (Spent)</span>
+                </button>
+                <button type="button" id="btnTypeIncome" class="py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+                  <i class="fa-solid fa-arrow-up"></i>
+                  <span>Pocket Money (Received)</span>
+                </button>
               </div>
             </div>
 
-            <!-- Campus Quick Presets -->
-            <div class="mb-4">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Campus Quick-Presets</span>
-                <span class="text-[10px] text-brand-600 dark:text-brand-400 font-semibold">1-Tap Fill</span>
-              </div>
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <button type="button" class="preset-chip quick-chip px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600" data-type="expense" data-acc="Cash" data-title="Chai & Samosa" data-amount="20" data-cat="Food & Canteen">☕ Chai ₹20</button>
-                <button type="button" class="preset-chip quick-chip px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600" data-type="expense" data-acc="UPI" data-title="Canteen Lunch" data-amount="80" data-cat="Food & Canteen">🍔 Lunch ₹80</button>
-                <button type="button" class="preset-chip quick-chip px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600" data-type="expense" data-acc="UPI" data-title="Metro Recharge" data-amount="100" data-cat="Transport & Metro">🚇 Metro ₹100</button>
-                <button type="button" class="preset-chip quick-chip px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600" data-type="expense" data-acc="Cash" data-title="Assignment Xerox" data-amount="30" data-cat="College & Academics">📚 Xerox ₹30</button>
-                <button type="button" class="preset-chip quick-chip px-2 py-1 rounded-lg text-[11px] font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/80 hover:border-indigo-500" data-type="transfer" data-from="UPI" data-to="Cash" data-title="Campus ATM Cash Withdrawal" data-amount="1000">🏧 ATM ₹1000</button>
-                <button type="button" class="preset-chip quick-chip px-2 py-1 rounded-lg text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 hover:border-emerald-500" data-type="income" data-acc="UPI" data-title="Monthly Pocket Money" data-amount="3000" data-cat="Pocket Money">💰 +₹3000 Pocket</button>
+            <!-- Account Selector: UPI vs Cash -->
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Wallet / Account</label>
+              <div class="grid grid-cols-2 gap-3">
+                <label id="accountLabelUPI" class="cursor-pointer border-2 border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 rounded-xl p-3 flex items-center gap-3 transition shadow-sm">
+                  <input type="radio" name="txAccountRadio" value="UPI" checked class="hidden">
+                  <div class="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                  </div>
+                  <div>
+                    <span class="block text-xs font-bold">UPI Account</span>
+                    <span class="text-[10px] text-sky-600/70 dark:text-sky-400/70">PhonePe / GPay / Paytm</span>
+                  </div>
+                </label>
+
+                <label id="accountLabelCash" class="cursor-pointer border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl p-3 flex items-center gap-3 transition">
+                  <input type="radio" name="txAccountRadio" value="Cash" class="hidden">
+                  <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                  </div>
+                  <div>
+                    <span class="block text-xs font-bold">Physical Cash</span>
+                    <span class="text-[10px] text-slate-400">Cash in Pocket</span>
+                  </div>
+                </label>
               </div>
             </div>
 
-            <form id="transactionForm" class="space-y-4" novalidate>
-              
-              <!-- 1. THREE DISTINCT TRANSACTION TYPE BUTTONS -->
+            <!-- Description -->
+            <div>
+              <label for="txTitle" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Description <span class="text-rose-500">*</span></label>
+              <input type="text" id="txTitle" placeholder="e.g. Canteen Lunch, Books, Hostel Rent" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            </div>
+
+            <!-- Amount & Category -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Transaction Type</label>
-                <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/60 dark:border-slate-700">
-                  
-                  <!-- Type A: Expense -->
-                  <button type="button" id="btnTypeExpense" class="py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-rose-600 text-white shadow-sm shadow-rose-600/30">
-                    <i class="fa-solid fa-arrow-down"></i>
-                    <span>Expense</span>
-                  </button>
-                  
-                  <!-- Type B: Income -->
-                  <button type="button" id="btnTypeIncome" class="py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
-                    <i class="fa-solid fa-hand-holding-dollar"></i>
-                    <span>Income</span>
-                  </button>
-
-                  <!-- Type C: Transfer -->
-                  <button type="button" id="btnTypeTransfer" class="py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
-                    <i class="fa-solid fa-right-left"></i>
-                    <span>Transfer</span>
-                  </button>
-
-                </div>
-                <input type="hidden" id="txType" value="expense">
-              </div>
-
-              <!-- 2. DYNAMIC FIELD A: SINGLE ACCOUNT SELECTOR (For Expense & Income) -->
-              <div id="singleAccountContainer">
-                <label id="singleAccountLabel" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Source / Wallet Account</label>
-                <div class="grid grid-cols-2 gap-2">
-                  <label id="accountLabelUPI" class="cursor-pointer border-2 border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 rounded-xl p-3 flex items-center gap-3 transition">
-                    <input type="radio" name="txAccountRadio" value="UPI" checked class="sr-only">
-                    <div class="w-8 h-8 rounded-lg bg-sky-500 text-white flex items-center justify-center text-sm shadow-sm">
-                      <i class="fa-solid fa-mobile-screen"></i>
-                    </div>
-                    <div>
-                      <div class="text-xs font-bold">UPI</div>
-                      <div class="text-[10px] text-slate-500 dark:text-slate-400">GPay / PhonePe</div>
-                    </div>
-                  </label>
-
-                  <label id="accountLabelCash" class="cursor-pointer border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl p-3 flex items-center gap-3 transition">
-                    <input type="radio" name="txAccountRadio" value="Cash" class="sr-only">
-                    <div class="w-8 h-8 rounded-lg bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center text-sm shadow-sm">
-                      <i class="fa-solid fa-wallet"></i>
-                    </div>
-                    <div>
-                      <div class="text-xs font-bold">Cash</div>
-                      <div class="text-[10px] text-slate-500 dark:text-slate-400">Physical Pocket</div>
-                    </div>
-                  </label>
-                </div>
-                <input type="hidden" id="txAccount" value="UPI">
-              </div>
-
-              <!-- 3. DYNAMIC FIELD B: FROM ACCOUNT & TO ACCOUNT (Only for Transfer) -->
-              <div id="transferAccountsContainer" class="hidden space-y-2">
-                <div class="flex items-center justify-between">
-                  <label class="block text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Internal Account Transfer</label>
-                  <span class="text-[10px] font-semibold text-slate-400 italic">No impact on Total Spent</span>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label for="txFromAccount" class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">From Account (Source)</label>
-                    <select id="txFromAccount" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white">
-                      <option value="UPI" selected>UPI (Bank / App)</option>
-                      <option value="Cash">Cash (Pocket)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label for="txToAccount" class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">To Account (Destination)</label>
-                    <select id="txToAccount" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white">
-                      <option value="Cash" selected>Cash (Pocket)</option>
-                      <option value="UPI">UPI (Bank / App)</option>
-                    </select>
-                  </div>
-                </div>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400 bg-indigo-50 dark:bg-indigo-950/40 p-2 rounded-lg border border-indigo-100 dark:border-indigo-900/50">
-                  <i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> Moves money between your accounts (e.g. ATM withdrawal or cash deposit).
-                </p>
-              </div>
-
-              <!-- Description / Title -->
-              <div>
-                <label for="txTitle" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Description / Payee <span class="text-rose-500">*</span></label>
+                <label for="txAmount" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Amount <span class="text-rose-500">*</span></label>
                 <div class="relative">
-                  <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-xs">
-                    <i class="fa-solid fa-pencil"></i>
-                  </span>
-                  <input type="text" id="txTitle" placeholder="e.g. Canteen Lunch, Metro Recharge, ATM Withdrawal" required class="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+                  <span id="amountSymbolPrefix" class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 font-bold text-sm">₹</span>
+                  <input type="number" id="txAmount" min="0.01" step="any" placeholder="0.00" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-8 pr-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 </div>
               </div>
 
-              <!-- Amount & Category Grid -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <!-- Amount -->
-                <div>
-                  <label for="txAmount" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Amount <span class="text-rose-500">*</span></label>
-                  <div class="relative">
-                    <span id="amountSymbolPrefix" class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 font-bold text-sm">₹</span>
-                    <input type="number" id="txAmount" step="1" min="1" placeholder="0" required class="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl pl-8 pr-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
-                  </div>
-                </div>
-
-                <!-- Category (Hidden if Transfer) -->
-                <div id="categoryContainer">
-                  <label for="txCategory" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Category <span class="text-rose-500">*</span></label>
-                  <div class="relative">
-                    <select id="txCategory" required class="w-full appearance-none bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition">
-                      <!-- Dynamically populated based on Expense vs Income -->
-                    </select>
-                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Date Picker -->
               <div>
-                <label for="txDate" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Date <span class="text-rose-500">*</span></label>
-                <div class="relative">
-                  <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-xs">
-                    <i class="fa-regular fa-calendar"></i>
-                  </span>
-                  <input type="date" id="txDate" required class="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
-                </div>
+                <label for="txCategory" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Category <span class="text-rose-500">*</span></label>
+                <select id="txCategory" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer">
+                  <!-- Populated via JS -->
+                </select>
               </div>
+            </div>
 
-              <!-- Notes (Optional) -->
+            <!-- Date & Notes -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label for="txNotes" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Notes / Tag (Optional)</label>
-                <input type="text" id="txNotes" placeholder="e.g. Split with Amit, Campus ATM slip" class="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+                <label for="txDate" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Date</label>
+                <input type="date" id="txDate" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
               </div>
 
-              <!-- Submit Button -->
-              <button type="submit" id="submitBtn" class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-check"></i>
+              <div>
+                <label for="txNotes" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Note (Optional)</label>
+                <input type="text" id="txNotes" placeholder="e.g. Shared with roommates" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <button type="submit" id="submitBtn" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i>
                 <span id="submitBtnText">Add Expense</span>
               </button>
-            </form>
+            </div>
+          </form>
 
+        </div>
+
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 3: TRANSFER FUNDS (ATM CASH WITHDRAWAL / DEPOSIT) -->
+      <!-- ================================================================= -->
+      <section id="viewTransfer" class="app-view space-y-6 max-w-2xl mx-auto">
+        
+        <div class="glass-panel rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">ATM Cash Transfer</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Shift funds between UPI and Cash without altering your total allowance</p>
           </div>
-        </section>
+          <button onclick="window.app.switchView('dashboard')" class="text-xs font-bold text-brand-600 hover:underline flex items-center gap-1">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back Home</span>
+          </button>
+        </div>
 
-        <!-- RIGHT COLUMN: TRANSACTION HISTORY & FILTERING (7 cols) -->
-        <section class="lg:col-span-7 space-y-4" aria-labelledby="history-heading">
-          
-          <!-- Filters Card -->
-          <div class="glass-panel rounded-2xl p-5 space-y-3.5">
-            
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="glass-panel rounded-3xl p-5 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
+          <form id="transferForm" class="space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <div class="flex items-center gap-2">
-                  <h2 id="history-heading" class="text-lg font-bold text-slate-900 dark:text-white">Transaction History</h2>
-                  <span id="txCountBadge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">0</span>
-                </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Search, filter, and review all financial records</p>
+                <label for="transferFrom" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Source Account (From)</label>
+                <select id="transferFrom" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white">
+                  <option value="UPI" selected>UPI Online Wallet</option>
+                  <option value="Cash">Physical Cash</option>
+                </select>
               </div>
 
-              <!-- Account Filter Tabs: All / UPI / Cash -->
-              <div class="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">
-                <button type="button" id="tabFilterAll" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition">All</button>
-                <button type="button" id="tabFilterUPI" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
-                  <span class="w-2 h-2 rounded-full bg-sky-500"></span> UPI
-                </button>
-                <button type="button" id="tabFilterCash" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Cash
-                </button>
+              <div>
+                <label for="transferTo" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Destination Account (To)</label>
+                <select id="transferTo" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white">
+                  <option value="Cash" selected>Physical Cash (In Pocket)</option>
+                  <option value="UPI">UPI Online Wallet</option>
+                </select>
               </div>
             </div>
 
-            <!-- Search Bar -->
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-xs">
-                <i class="fa-solid fa-magnifying-glass"></i>
-              </span>
-              <input type="text" id="searchInput" placeholder="Search title, note, or category..." class="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
-              <button id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs">
+            <div>
+              <label for="transferAmount" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Transfer Amount <span class="text-rose-500">*</span></label>
+              <div class="relative">
+                <span id="transferCurrencyPrefix" class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 font-bold text-sm">₹</span>
+                <input type="number" id="transferAmount" min="1" step="1" placeholder="e.g. 500" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-8 pr-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white">
+              </div>
+            </div>
+
+            <div>
+              <label for="transferNotes" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Note (Optional)</label>
+              <input type="text" id="transferNotes" placeholder="e.g. Withdrew from college SBI ATM" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white">
+            </div>
+
+            <div class="pt-2">
+              <button type="submit" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-lg shadow-brand-500/25 transition">
+                Execute ATM Transfer
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 4: ANALYTICS & VISUAL REPORTS -->
+      <!-- ================================================================= -->
+      <section id="viewAnalytics" class="app-view space-y-6">
+        
+        <div class="glass-panel rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <i class="fa-solid fa-chart-pie text-brand-600"></i>
+              <span>Spending Breakdown & Analytics</span>
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Visual insights on where your money goes</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+              <button id="chartFilterAll" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition">All</button>
+              <button id="chartFilterUPI" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">UPI</button>
+              <button id="chartFilterCash" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Cash</button>
+            </div>
+
+            <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+              <button id="chartViewDonut" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition" title="Donut View"><i class="fa-solid fa-circle-notch"></i></button>
+              <button id="chartViewBar" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition" title="Bar Chart"><i class="fa-solid fa-chart-column"></i></button>
+            </div>
+
+            <button id="exportCsvBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-file-arrow-down text-brand-600"></i>
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Chart & Leaderboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <div class="lg:col-span-7 glass-panel rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col items-center justify-center relative min-h-[380px]">
+            <div class="w-full max-w-sm aspect-square relative flex items-center justify-center">
+              <canvas id="expenseChart" class="w-full h-full"></canvas>
+              <div id="chartCenterOverlay" class="absolute flex flex-col items-center justify-center text-center pointer-events-none">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Spent</span>
+                <span id="chartCenterAmount" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">₹0</span>
+                <span id="chartCenterSubtext" class="text-[10px] text-slate-400">across accounts</span>
+              </div>
+            </div>
+            <div id="noDataChart" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-slate-400">
+              <i class="fa-solid fa-chart-pie text-4xl mb-2 text-slate-300 dark:text-slate-700"></i>
+              <p class="text-xs font-semibold">No expense records found yet.</p>
+              <button onclick="window.app.switchView('add')" class="mt-3 px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-600 text-white">Record Expense</button>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 glass-panel rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between space-y-4">
+            <div>
+              <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category Leaderboard</h3>
+                <span id="chartCategoryCount" class="text-[11px] font-bold text-brand-600 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full">0 Categories</span>
+              </div>
+              <div id="categoryLeaderboard" class="space-y-3">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+            
+            <div class="p-3.5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 text-xs text-brand-900 dark:text-brand-300">
+              <p class="font-bold mb-0.5"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> Student Tip</p>
+              <p class="text-[11px] text-slate-600 dark:text-slate-400">Categorizing canteen meals vs college books helps you save before month-end!</p>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 5: PASSBOOK (FULL TRANSACTION STATEMENT) -->
+      <!-- ================================================================= -->
+      <section id="viewHistory" class="app-view space-y-5">
+        
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 space-y-4">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="searchInput" placeholder="Search transactions (e.g. Canteen, Metro)... (Ctrl+K)" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-9 py-2 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500">
+              <button id="clearSearchBtn" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden text-xs">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
 
-            <!-- Category, Type & Sort Dropdowns -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-              
-              <!-- Filter Type -->
-              <div class="relative">
-                <select id="filterType" class="w-full appearance-none bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition">
-                  <option value="all">All Types</option>
-                  <option value="expense">Only Expenses</option>
-                  <option value="income">Only Pocket Money</option>
-                  <option value="transfer">Only Transfers</option>
-                </select>
-                <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-              </div>
+            <button onclick="window.app.switchView('add')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20 transition flex items-center justify-center gap-1.5 shrink-0">
+              <i class="fa-solid fa-plus"></i>
+              <span>Add Record</span>
+            </button>
+          </div>
 
-              <!-- Filter Category -->
-              <div class="relative">
-                <select id="filterCategory" class="w-full appearance-none bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition">
-                  <option value="all">All Categories</option>
-                  <!-- Populated dynamically -->
-                </select>
-                <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-              </div>
-
-              <!-- Filter Sort -->
-              <div class="relative">
-                <select id="filterSort" class="w-full appearance-none bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer transition">
-                  <option value="date-desc">Newest First</option>
-                  <option value="date-asc">Oldest First</option>
-                  <option value="amount-desc">Highest Amount</option>
-                  <option value="amount-asc">Lowest Amount</option>
-                </select>
-                <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-              </div>
-
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+            <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+              <button id="tabFilterAll" class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition">All</button>
+              <button id="tabFilterUPI" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"><i class="fa-solid fa-mobile-screen mr-1 text-[10px]"></i> UPI</button>
+              <button id="tabFilterCash" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"><i class="fa-solid fa-money-bill mr-1 text-[10px]"></i> Cash</button>
             </div>
 
+            <div class="flex items-center gap-2">
+              <select id="filterCategory" class="bg-slate-100 dark:bg-slate-800 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none cursor-pointer">
+                <option value="all">All Categories</option>
+              </select>
+
+              <select id="filterType" class="bg-slate-100 dark:bg-slate-800 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none cursor-pointer">
+                <option value="all">All Types</option>
+                <option value="expense">Expenses Only</option>
+                <option value="income">Pocket Money Only</option>
+                <option value="transfer">Transfers Only</option>
+              </select>
+
+              <select id="filterSort" class="bg-slate-100 dark:bg-slate-800 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none cursor-pointer">
+                <option value="date-desc">Newest First</option>
+                <option value="date-asc">Oldest First</option>
+                <option value="amount-desc">Highest Amount</option>
+                <option value="amount-asc">Lowest Amount</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transaction Cards -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Entries Found: <span id="txCountBadge" class="text-slate-800 dark:text-white font-extrabold">0</span></span>
+            <span class="text-[11px] text-slate-400">Permanently saved in MongoDB Atlas</span>
           </div>
 
-          <!-- Transaction List -->
-          <div id="transactionList" class="space-y-3 min-h-[300px]">
-            <!-- Rendered dynamically -->
+          <div id="transactionList" class="space-y-2.5">
+            <!-- Dynamically populated -->
           </div>
 
-          <!-- Empty State -->
-          <div id="emptyState" class="hidden glass-panel rounded-2xl p-10 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center text-2xl shadow-sm">
+          <div id="emptyState" class="hidden glass-panel rounded-3xl p-10 text-center border border-slate-200/80 dark:border-slate-800 space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto text-xl">
               <i class="fa-solid fa-receipt"></i>
             </div>
-            <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">No Transactions Found</h3>
-            <p id="emptyStateMessage" class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-4">You haven't logged any transactions yet or none match your current filters.</p>
-            <div class="flex items-center justify-center gap-2.5">
-              <button id="emptyLoadDemoBtn" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-md shadow-brand-500/20 transition flex items-center gap-2">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                <span>Load Sample Student Data</span>
-              </button>
+            <h4 class="text-sm font-bold text-slate-900 dark:text-white">No transactions match your search</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">Try clearing your filters or record a new expense.</p>
+            <button onclick="window.app.switchView('add')" class="mt-2 px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white">Record Transaction</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- VIEW 6: ACCOUNT & SETTINGS -->
+      <!-- ================================================================= -->
+      <section id="viewSettings" class="app-view space-y-6 max-w-2xl mx-auto">
+        
+        <div class="glass-panel rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-3.5">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center text-xl font-black shadow-glow-indigo">
+                <span id="settingsUserAvatarLetter">P</span>
+              </div>
+              <div>
+                <h3 id="settingsUserName" class="text-base font-extrabold text-slate-900 dark:text-white">Prince Shrivastva</h3>
+                <p id="settingsUserEmail" class="text-xs text-slate-500 dark:text-slate-400">princeshrivastva12@gmail.com</p>
+              </div>
+            </div>
+            <button id="settingsAuthActionBtn" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white transition">
+              Switch Account
+            </button>
+          </div>
+
+          <!-- Currency Preference -->
+          <div class="space-y-2">
+            <label for="currencySelector" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Default Currency</label>
+            <div class="relative">
+              <select id="currencySelector" class="w-full appearance-none bg-slate-50 dark:bg-slate-800 text-xs font-bold px-3.5 py-3 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
+                <option value="₹">INR (₹) — Indian Rupee</option>
+                <option value="$">USD ($) — US Dollar</option>
+                <option value="€">EUR (€) — Euro</option>
+                <option value="£">GBP (£) — British Pound</option>
+                <option value="AED">AED — UAE Dirham</option>
+              </select>
+              <i class="fa-solid fa-chevron-down text-xs text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
             </div>
           </div>
 
-        </section>
+          <!-- Install App Card -->
+          <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-base shrink-0">
+                <i class="fa-solid fa-mobile-screen"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-emerald-900 dark:text-emerald-300">Install PocketTrack App</h4>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400">Run as standalone app on your phone or PC</p>
+              </div>
+            </div>
+            <button onclick="window.app.openInstallModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shrink-0">
+              Install App
+            </button>
+          </div>
 
-      </div>
+          <!-- MongoDB Cloud Database Info -->
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-database text-emerald-500"></i> Cloud Database Status
+              </span>
+              <span class="text-emerald-600 font-bold flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 live-indicator"></span>
+                <span>MongoDB Atlas (Permanent)</span>
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">All balances and transactions are stored directly in your MongoDB Atlas cloud database. Data is never erased.</p>
+          </div>
+
+        </div>
+
+      </section>
 
     </main>
+
+    <!-- User Authentication Modal (Switch Account / Sign In / Register) -->
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+      <div id="authModalContent" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl transition-all transform scale-95 opacity-0 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-purple-600 flex items-center justify-center text-white text-lg shadow-md">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+              <h3 id="authModalTitle" class="font-extrabold text-base text-slate-900 dark:text-white">Account & Cloud Sync</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Saved permanently in MongoDB Atlas</p>
+            </div>
+          </div>
+          <button id="closeAuthModalBtn" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
+          <button type="button" id="tabAuthLogin" class="py-2 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition font-bold">Sign In</button>
+          <button type="button" id="tabAuthSignup" class="py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Create Account</button>
+        </div>
+
+        <div id="authErrorAlert" class="hidden p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/80 text-rose-700 dark:text-rose-400 text-xs font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+          <span id="authErrorMsg">Error message</span>
+        </div>
+
+        <form id="authForm" class="space-y-4">
+          <div id="authNameField" class="hidden">
+            <label for="authName" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Full Name</label>
+            <input type="text" id="authName" placeholder="e.g. Prince Shrivastva" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 dark:text-white">
+          </div>
+
+          <div>
+            <label for="authEmail" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Email Address</label>
+            <input type="email" id="authEmail" placeholder="your.name@student.college.edu" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 dark:text-white">
+          </div>
+
+          <div>
+            <label for="authPassword" class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Password</label>
+            <input type="password" id="authPassword" placeholder="Minimum 6 characters" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 dark:text-white">
+          </div>
+
+          <div class="pt-2 space-y-2">
+            <button type="submit" id="authSubmitBtn" class="w-full py-2.5 rounded-xl font-bold text-xs bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/25 transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-arrow-right-to-bracket"></i>
+              <span id="authSubmitText">Sign In</span>
+            </button>
+            <button type="button" id="continueGuestBtn" class="w-full py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              Close
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- PWA Install Modal -->
+    <div id="installModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
+      <div id="installModalContent" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl transition-all transform scale-95 opacity-0">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-500 flex items-center justify-center text-white text-lg shadow-md">
+              <i class="fa-solid fa-mobile-screen-button"></i>
+            </div>
+            <div>
+              <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Install PocketTrack App</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Run as a standalone app on your device</p>
+            </div>
+          </div>
+          <button id="closeInstallModalBtn" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="py-5 space-y-4 text-xs text-slate-600 dark:text-slate-300">
+          <div id="nativeInstallPromptBox" class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 flex flex-col gap-3">
+            <p class="font-semibold text-brand-900 dark:text-brand-300">Fast 1-Click Installation</p>
+            <button id="triggerNativeInstallBtn" class="w-full py-2.5 px-4 rounded-xl font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/25 transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-download"></i>
+              <span>Install PocketTrack Now</span>
+            </button>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-2">
+            <p class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              <i class="fa-brands fa-apple text-slate-700 dark:text-slate-300"></i> iPhone / iPad (Safari)
+            </p>
+            <ol class="list-decimal list-inside space-y-1 text-slate-500 dark:text-slate-400 pl-1">
+              <li>Tap the <span class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-solid fa-arrow-up-from-bracket text-brand-600"></i> Share</span> icon in Safari bottom bar.</li>
+              <li>Scroll down and tap <span class="font-bold text-slate-700 dark:text-slate-200"><i class="fa-regular fa-square-plus text-emerald-600"></i> Add to Home Screen</span>.</li>
+              <li>Tap <span class="font-bold text-brand-600">Add</span> in the top-right corner.</li>
+            </ol>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-2">
+            <p class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+              <i class="fa-brands fa-chrome text-amber-500"></i> Android Chrome / Windows / Mac
+            </p>
+            <p class="text-slate-500 dark:text-slate-400">
+              Tap the browser menu <span class="font-bold text-slate-700 dark:text-slate-200">⋮</span> and select <span class="font-bold text-slate-700 dark:text-slate-200">"Install app"</span> or <span class="font-bold text-slate-700 dark:text-slate-200">"Add to Home screen"</span>.
+            </p>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button id="dismissInstallModalBtn" class="w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            Got It
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
 
     <!-- Footer -->
-    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+    <footer class="mt-auto border-t border-slate-200 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm py-5 text-center text-xs text-slate-500 dark:text-slate-400">
       <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p>© 2026 PocketTrack. Python 3 & Cloud Database Architecture.</p>
+        <p>© 2026 PocketTrack • Connected to MongoDB Atlas Cloud</p>
         <div class="flex items-center gap-4 text-slate-400 dark:text-slate-500">
-          <span><i class="fa-brands fa-python text-amber-500 mr-1"></i> Python Flask Engine</span>
-          <span><i class="fa-solid fa-database text-emerald-500 mr-1"></i> Dual MongoDB / SQLite</span>
+          <span><i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i> Data Saved Permanently</span>
+          <span><i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Instant Cloud Sync</span>
         </div>
       </div>
     </footer>
@@ -662,983 +834,6 @@
   </div>
 
   <!-- Application Logic -->
-  <script>
-    const CATEGORIES = {
-      expense: [
-        { id: 'Food & Canteen', icon: 'fa-utensils', color: '#f97316', bg: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' },
-        { id: 'College & Academics', icon: 'fa-graduation-cap', color: '#6366f1', bg: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' },
-        { id: 'Transport & Metro', icon: 'fa-bus', color: '#0284c7', bg: 'bg-sky-500/10 text-sky-600 dark:text-sky-400' },
-        { id: 'Entertainment & Hangouts', icon: 'fa-film', color: '#ec4899', bg: 'bg-pink-500/10 text-pink-600 dark:text-pink-400' },
-        { id: 'Online Shopping', icon: 'fa-bag-shopping', color: '#a855f7', bg: 'bg-purple-500/10 text-purple-600 dark:text-purple-400' },
-        { id: 'Recharge & Bills', icon: 'fa-bolt', color: '#eab308', bg: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' },
-        { id: 'Hostel & Rent', icon: 'fa-house', color: '#14b8a6', bg: 'bg-teal-500/10 text-teal-600 dark:text-teal-400' },
-        { id: 'Other Expense', icon: 'fa-ellipsis', color: '#64748b', bg: 'bg-slate-500/10 text-slate-600 dark:text-slate-400' }
-      ],
-      income: [
-        { id: 'Pocket Money', icon: 'fa-hand-holding-dollar', color: '#10b981', bg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
-        { id: 'Internship / Stipend', icon: 'fa-laptop-code', color: '#06b6d4', bg: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' },
-        { id: 'Gifts & Cash', icon: 'fa-gift', color: '#f43f5e', bg: 'bg-rose-500/10 text-rose-600 dark:text-rose-400' },
-        { id: 'Other Income', icon: 'fa-plus', color: '#64748b', bg: 'bg-slate-500/10 text-slate-600 dark:text-slate-400' }
-      ]
-    };
-
-    class StudentExpenseTracker {
-      constructor() {
-        this.transactions = [];
-        this.summary = null;
-        this.currency = localStorage.getItem('pt_py_currency') || '₹';
-        this.theme = localStorage.getItem('pt_py_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        
-        this.filters = {
-          account: 'all',
-          type: 'all',
-          category: 'all',
-          sort: 'date-desc',
-          search: ''
-        };
-
-        this.chartFilterAccount = 'all';
-        this.chartType = 'doughnut';
-        this.chart = null;
-
-        this.initDOM();
-        this.initTheme();
-        this.bindEvents();
-        this.setType('expense');
-        this.setDefaultDate();
-        this.initChart();
-
-        this.fetchStatus();
-        this.fetchTransactions();
-      }
-
-      initDOM() {
-        // Stats
-        this.statUpiBalance = document.getElementById('statUpiBalance');
-        this.statUpiCount = document.getElementById('statUpiCount');
-        this.statCashBalance = document.getElementById('statCashBalance');
-        this.statCashCount = document.getElementById('statCashCount');
-        this.statTotalPocketMoney = document.getElementById('statTotalPocketMoney');
-        this.statPocketMoneyCount = document.getElementById('statPocketMoneyCount');
-        this.statTotalSpent = document.getElementById('statTotalSpent');
-        this.statSpendRatioBadge = document.getElementById('statSpendRatioBadge');
-        this.statSpentBar = document.getElementById('statSpentBar');
-        this.statRemainingPocketMoney = document.getElementById('statRemainingPocketMoney');
-
-        // Chart & Leaderboard
-        this.chartCategoryCount = document.getElementById('chartCategoryCount');
-        this.chartCenterOverlay = document.getElementById('chartCenterOverlay');
-        this.chartCenterAmount = document.getElementById('chartCenterAmount');
-        this.chartCenterSubtext = document.getElementById('chartCenterSubtext');
-        this.categoryLeaderboard = document.getElementById('categoryLeaderboard');
-        this.noDataChart = document.getElementById('noDataChart');
-        this.chartFilterAll = document.getElementById('chartFilterAll');
-        this.chartFilterUPI = document.getElementById('chartFilterUPI');
-        this.chartFilterCash = document.getElementById('chartFilterCash');
-        this.chartViewDonut = document.getElementById('chartViewDonut');
-        this.chartViewBar = document.getElementById('chartViewBar');
-
-        // Form elements
-        this.transactionForm = document.getElementById('transactionForm');
-        this.btnTypeExpense = document.getElementById('btnTypeExpense');
-        this.btnTypeIncome = document.getElementById('btnTypeIncome');
-        this.btnTypeTransfer = document.getElementById('btnTypeTransfer');
-        this.txType = document.getElementById('txType');
-        this.formHeaderIcon = document.getElementById('formHeaderIcon');
-        this.formSubtext = document.getElementById('formSubtext');
-
-        this.singleAccountContainer = document.getElementById('singleAccountContainer');
-        this.singleAccountLabel = document.getElementById('singleAccountLabel');
-        this.accountLabelUPI = document.getElementById('accountLabelUPI');
-        this.accountLabelCash = document.getElementById('accountLabelCash');
-        this.txAccount = document.getElementById('txAccount');
-
-        this.transferAccountsContainer = document.getElementById('transferAccountsContainer');
-        this.txFromAccount = document.getElementById('txFromAccount');
-        this.txToAccount = document.getElementById('txToAccount');
-
-        this.categoryContainer = document.getElementById('categoryContainer');
-        this.txCategory = document.getElementById('txCategory');
-        this.txTitle = document.getElementById('txTitle');
-        this.txAmount = document.getElementById('txAmount');
-        this.txDate = document.getElementById('txDate');
-        this.txNotes = document.getElementById('txNotes');
-        this.submitBtn = document.getElementById('submitBtn');
-        this.submitBtnText = document.getElementById('submitBtnText');
-        this.amountSymbolPrefix = document.getElementById('amountSymbolPrefix');
-
-        // History & Filter elements
-        this.transactionList = document.getElementById('transactionList');
-        this.emptyState = document.getElementById('emptyState');
-        this.txCountBadge = document.getElementById('txCountBadge');
-        this.searchInput = document.getElementById('searchInput');
-        this.clearSearchBtn = document.getElementById('clearSearchBtn');
-        this.filterCategory = document.getElementById('filterCategory');
-        this.filterType = document.getElementById('filterType');
-        this.filterSort = document.getElementById('filterSort');
-        this.tabFilterAll = document.getElementById('tabFilterAll');
-        this.tabFilterUPI = document.getElementById('tabFilterUPI');
-        this.tabFilterCash = document.getElementById('tabFilterCash');
-
-        // Header actions
-        this.currencySelector = document.getElementById('currencySelector');
-        this.loadDemoBtn = document.getElementById('loadDemoBtn');
-        this.emptyLoadDemoBtn = document.getElementById('emptyLoadDemoBtn');
-        this.exportCsvBtn = document.getElementById('exportCsvBtn');
-        this.themeToggleBtn = document.getElementById('themeToggleBtn');
-        this.themeIcon = document.getElementById('themeIcon');
-        this.cloudStatusBadge = document.getElementById('cloudStatusBadge');
-        this.cloudStatusDot = document.getElementById('cloudStatusDot');
-        this.cloudStatusText = document.getElementById('cloudStatusText');
-        this.toastContainer = document.getElementById('toastContainer');
-      }
-
-      initTheme() {
-        if (this.theme === 'dark') {
-          document.documentElement.classList.add('dark');
-          this.themeIcon.className = 'fa-solid fa-sun text-amber-400 text-xs';
-        } else {
-          document.documentElement.classList.remove('dark');
-          this.themeIcon.className = 'fa-solid fa-moon text-slate-600 text-xs';
-        }
-      }
-
-      toggleTheme() {
-        this.theme = this.theme === 'dark' ? 'light' : 'dark';
-        localStorage.setItem('pt_py_theme', this.theme);
-        this.initTheme();
-        this.renderChart();
-        this.showToast(`Switched to ${this.theme} mode`, 'info');
-      }
-
-      setDefaultDate() {
-        this.txDate.value = new Date().toISOString().split('T')[0];
-      }
-
-      bindEvents() {
-        // Theme & Currency
-        this.themeToggleBtn.addEventListener('click', () => this.toggleTheme());
-        this.currencySelector.value = this.currency;
-        this.amountSymbolPrefix.textContent = this.currency;
-        this.currencySelector.addEventListener('change', (e) => {
-          this.currency = e.target.value;
-          localStorage.setItem('pt_py_currency', this.currency);
-          this.amountSymbolPrefix.textContent = this.currency;
-          this.render();
-          this.showToast(`Currency set to ${this.currency}`, 'info');
-        });
-
-        // 3 Distinct Transaction Type Buttons
-        this.btnTypeExpense.addEventListener('click', () => this.setType('expense'));
-        this.btnTypeIncome.addEventListener('click', () => this.setType('income'));
-        this.btnTypeTransfer.addEventListener('click', () => this.setType('transfer'));
-
-        // Single Account Radios
-        document.querySelectorAll('input[name="txAccountRadio"]').forEach((radio) => {
-          radio.addEventListener('change', (e) => this.setAccount(e.target.value));
-        });
-
-        // Campus Quick Presets
-        document.querySelectorAll('.preset-chip').forEach((chip) => {
-          chip.addEventListener('click', () => {
-            const type = chip.getAttribute('data-type');
-            const title = chip.getAttribute('data-title');
-            const amount = chip.getAttribute('data-amount');
-            const cat = chip.getAttribute('data-cat');
-            const acc = chip.getAttribute('data-acc');
-            const fromAcc = chip.getAttribute('data-from');
-            const toAcc = chip.getAttribute('data-to');
-
-            this.setType(type);
-            this.txTitle.value = title;
-            this.txAmount.value = amount;
-
-            if (type === 'transfer') {
-              if (fromAcc) this.txFromAccount.value = fromAcc;
-              if (toAcc) this.txToAccount.value = toAcc;
-            } else {
-              if (acc) this.setAccount(acc);
-              if (cat) this.txCategory.value = cat;
-            }
-
-            this.showToast(`Filled preset: ${title} (${this.currency}${amount})`, 'info');
-          });
-        });
-
-        // Form Submit
-        this.transactionForm.addEventListener('submit', (e) => this.handleSubmit(e));
-
-        // Sample Data & Export
-        this.loadDemoBtn.addEventListener('click', () => this.loadDemoData());
-        this.emptyLoadDemoBtn.addEventListener('click', () => this.loadDemoData());
-        this.exportCsvBtn.addEventListener('click', () => this.exportToCSV());
-
-        // History Filters & Search
-        this.tabFilterAll.addEventListener('click', () => this.setHistoryAccountFilter('all'));
-        this.tabFilterUPI.addEventListener('click', () => this.setHistoryAccountFilter('UPI'));
-        this.tabFilterCash.addEventListener('click', () => this.setHistoryAccountFilter('Cash'));
-
-        this.searchInput.addEventListener('input', (e) => {
-          this.filters.search = e.target.value.trim().toLowerCase();
-          this.clearSearchBtn.classList.toggle('hidden', !e.target.value);
-          this.renderHistoryList();
-        });
-
-        this.clearSearchBtn.addEventListener('click', () => {
-          this.searchInput.value = '';
-          this.filters.search = '';
-          this.clearSearchBtn.classList.add('hidden');
-          this.renderHistoryList();
-          this.searchInput.focus();
-        });
-
-        this.filterType.addEventListener('change', (e) => {
-          this.filters.type = e.target.value;
-          this.renderHistoryList();
-        });
-
-        this.filterCategory.addEventListener('change', (e) => {
-          this.filters.category = e.target.value;
-          this.renderHistoryList();
-        });
-
-        this.filterSort.addEventListener('change', (e) => {
-          this.filters.sort = e.target.value;
-          this.renderHistoryList();
-        });
-
-        // Chart Controls
-        this.chartFilterAll.addEventListener('click', () => this.setChartAccountFilter('all'));
-        this.chartFilterUPI.addEventListener('click', () => this.setChartAccountFilter('UPI'));
-        this.chartFilterCash.addEventListener('click', () => this.setChartAccountFilter('Cash'));
-        this.chartViewDonut.addEventListener('click', () => this.setChartView('doughnut'));
-        this.chartViewBar.addEventListener('click', () => this.setChartView('bar'));
-      }
-
-      /**
-       * CRITICAL BUSINESS LOGIC UI SWITCHER:
-       * Dynamically changes form fields based on whether type is 'income', 'expense', or 'transfer'.
-       */
-      setType(type) {
-        this.txType.value = type;
-
-        const activeExpense = 'py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-rose-600 text-white shadow-sm shadow-rose-600/30';
-        const activeIncome = 'py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow-sm shadow-emerald-600/30';
-        const activeTransfer = 'py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow-sm shadow-indigo-600/30';
-        const inactiveBtn = 'py-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
-
-        this.btnTypeExpense.className = type === 'expense' ? activeExpense : inactiveBtn;
-        this.btnTypeIncome.className = type === 'income' ? activeIncome : inactiveBtn;
-        this.btnTypeTransfer.className = type === 'transfer' ? activeTransfer : inactiveBtn;
-
-        if (type === 'expense') {
-          // 1. Expense View
-          this.singleAccountContainer.classList.remove('hidden');
-          this.transferAccountsContainer.classList.add('hidden');
-          this.categoryContainer.classList.remove('hidden');
-
-          this.singleAccountLabel.textContent = 'Paid From Account (Source)';
-          this.formHeaderIcon.className = 'w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 flex items-center justify-center text-sm shadow-sm';
-          this.formHeaderIcon.innerHTML = '<i class="fa-solid fa-arrow-down"></i>';
-          this.formSubtext.textContent = 'Deducts money from account and adds to Total Spent';
-
-          this.submitBtn.className = 'w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2';
-          this.submitBtnText.textContent = 'Add Expense';
-
-          this.populateCategories('expense');
-
-        } else if (type === 'income') {
-          // 2. Income View
-          this.singleAccountContainer.classList.remove('hidden');
-          this.transferAccountsContainer.classList.add('hidden');
-          this.categoryContainer.classList.remove('hidden');
-
-          this.singleAccountLabel.textContent = 'Deposit Into Account (Destination)';
-          this.formHeaderIcon.className = 'w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm shadow-sm';
-          this.formHeaderIcon.innerHTML = '<i class="fa-solid fa-hand-holding-dollar"></i>';
-          this.formSubtext.textContent = 'Adds money to account and increases Total Pocket Money';
-
-          this.submitBtn.className = 'w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white shadow-lg shadow-emerald-600/25 active:scale-[0.99] transition flex items-center justify-center gap-2';
-          this.submitBtnText.textContent = 'Add Pocket Money';
-
-          this.populateCategories('income');
-
-        } else if (type === 'transfer') {
-          // 3. Transfer View: CRITICAL: SHOW 'FROM ACCOUNT' & 'TO ACCOUNT', HIDE CATEGORY!
-          this.singleAccountContainer.classList.add('hidden');
-          this.transferAccountsContainer.classList.remove('hidden');
-          this.categoryContainer.classList.add('hidden'); // Category is hidden for transfers!
-
-          this.formHeaderIcon.className = 'w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm shadow-sm';
-          this.formHeaderIcon.innerHTML = '<i class="fa-solid fa-right-left"></i>';
-          this.formSubtext.textContent = 'Moves balance between accounts (does NOT change Total Spent or Pocket Money)';
-
-          this.submitBtn.className = 'w-full py-3 px-4 rounded-xl font-bold text-sm bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white shadow-lg shadow-brand-500/25 active:scale-[0.99] transition flex items-center justify-center gap-2';
-          this.submitBtnText.textContent = 'Execute Transfer';
-        }
-      }
-
-      setAccount(account) {
-        this.txAccount.value = account;
-        const upiRadio = document.querySelector('input[name="txAccountRadio"][value="UPI"]');
-        const cashRadio = document.querySelector('input[name="txAccountRadio"][value="Cash"]');
-
-        if (account === 'UPI') {
-          if (upiRadio) upiRadio.checked = true;
-          this.accountLabelUPI.className = 'cursor-pointer border-2 border-sky-500 bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 rounded-xl p-3 flex items-center gap-3 transition shadow-sm';
-          this.accountLabelCash.className = 'cursor-pointer border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl p-3 flex items-center gap-3 transition';
-        } else {
-          if (cashRadio) cashRadio.checked = true;
-          this.accountLabelCash.className = 'cursor-pointer border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 rounded-xl p-3 flex items-center gap-3 transition shadow-sm';
-          this.accountLabelUPI.className = 'cursor-pointer border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl p-3 flex items-center gap-3 transition';
-        }
-      }
-
-      populateCategories(type) {
-        const list = CATEGORIES[type] || [];
-        this.txCategory.innerHTML = list.map((c) => `<option value="${c.id}">${c.id}</option>`).join('');
-      }
-
-      populateFilterCategoryDropdown() {
-        const unique = [
-          ...CATEGORIES.expense.map(c => c.id),
-          ...CATEGORIES.income.map(c => c.id),
-          'Transfer'
-        ];
-        const uniqueSet = Array.from(new Set(unique));
-        this.filterCategory.innerHTML = '<option value="all">All Categories</option>' +
-          uniqueSet.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-      }
-
-      // ==========================================
-      // API Communication
-      // ==========================================
-
-      async fetchStatus() {
-        try {
-          const res = await fetch('/api/status');
-          const data = await res.json();
-          if (data.connected) {
-            this.cloudStatusBadge.className = 'flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80 transition';
-            this.cloudStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-500 live-indicator';
-            this.cloudStatusText.textContent = data.engine;
-          }
-        } catch (e) {
-          console.warn('Backend status check failed', e);
-        }
-      }
-
-      async fetchTransactions() {
-        try {
-          const res = await fetch('/api/transactions');
-          const data = await res.json();
-          if (data.success) {
-            this.transactions = data.transactions || [];
-            this.summary = data.summary;
-            this.populateFilterCategoryDropdown();
-            this.render();
-          }
-        } catch (e) {
-          console.error('Failed to fetch transactions:', e);
-          this.showToast('Unable to connect to Python backend server', 'error');
-        }
-      }
-
-      async handleSubmit(e) {
-        e.preventDefault();
-
-        const type = this.txType.value;
-        const title = this.txTitle.value.trim();
-        const amount = parseFloat(this.txAmount.value);
-        const date = this.txDate.value;
-        const notes = this.txNotes.value.trim();
-
-        if (!title) {
-          this.showToast('Please enter a description.', 'error');
-          this.txTitle.focus();
-          return;
-        }
-
-        if (isNaN(amount) || amount <= 0) {
-          this.showToast('Please enter a valid amount greater than 0.', 'error');
-          this.txAmount.focus();
-          return;
-        }
-
-        const payload = { type, title, amount, date, notes };
-
-        if (type === 'transfer') {
-          const from_account = this.txFromAccount.value;
-          const to_account = this.txToAccount.value;
-
-          if (from_account === to_account) {
-            this.showToast('Source and destination accounts must be different.', 'error');
-            return;
-          }
-
-          payload.from_account = from_account;
-          payload.to_account = to_account;
-        } else {
-          payload.account = this.txAccount.value;
-          payload.category = this.txCategory.value;
-        }
-
-        try {
-          const res = await fetch('/api/transactions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          const data = await res.json();
-          if (data.success) {
-            this.transactions.unshift(data.transaction);
-            this.summary = data.summary;
-            this.resetForm();
-            this.render();
-
-            if (type === 'income') {
-              confetti({ particleCount: 50, spread: 70, origin: { y: 0.7 } });
-              this.showToast(`Pocket Money added to ${payload.account}! 🎉`, 'success');
-            } else if (type === 'transfer') {
-              this.showToast(`Transferred ${this.formatCurrency(amount)} from ${payload.from_account} to ${payload.to_account} 🔄`, 'success');
-            } else {
-              this.showToast(`Expense of ${this.formatCurrency(amount)} logged from ${payload.account}`, 'success');
-            }
-          } else {
-            this.showToast(data.error || 'Failed to save transaction', 'error');
-          }
-        } catch (err) {
-          console.error(err);
-          this.showToast('Network error while saving transaction.', 'error');
-        }
-      }
-
-      resetForm() {
-        this.txTitle.value = '';
-        this.txAmount.value = '';
-        this.txNotes.value = '';
-        this.setDefaultDate();
-        this.setType('expense');
-      }
-
-      async deleteTransaction(id) {
-        if (!confirm('Are you sure you want to delete this record?')) return;
-
-        try {
-          const res = await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
-          const data = await res.json();
-          if (data.success) {
-            this.transactions = this.transactions.filter(t => t.id !== id);
-            this.summary = data.summary;
-            this.render();
-            this.showToast('Transaction deleted.', 'info');
-          }
-        } catch (err) {
-          console.error(err);
-          this.showToast('Failed to delete transaction.', 'error');
-        }
-      }
-
-      async loadDemoData() {
-        try {
-          const res = await fetch('/api/demo-data', { method: 'POST' });
-          const data = await res.json();
-          if (data.success) {
-            await this.fetchTransactions();
-            confetti({ particleCount: 65, spread: 80, origin: { y: 0.6 } });
-            this.showToast('Sample student finances populated successfully! 🎉', 'success');
-          }
-        } catch (e) {
-          console.error(e);
-          this.showToast('Failed to load demo data.', 'error');
-        }
-      }
-
-      exportToCSV() {
-        if (this.transactions.length === 0) {
-          this.showToast('No transactions to export.', 'info');
-          return;
-        }
-
-        const headers = ['ID', 'Type', 'Account/Route', 'Title', 'Amount', 'Currency', 'Category', 'Date', 'Notes'];
-        const rows = this.transactions.map((t) => {
-          const accRoute = t.type === 'transfer' ? `${t.from_account} -> ${t.to_account}` : (t.account || '');
-          return [
-            `"${t.id}"`,
-            `"${t.type}"`,
-            `"${accRoute}"`,
-            `"${(t.title || '').replace(/"/g, '""')}"`,
-            t.amount,
-            `"${this.currency}"`,
-            `"${t.category || 'Transfer'}"`,
-            `"${t.date}"`,
-            `"${(t.notes || '').replace(/"/g, '""')}"`
-          ];
-        });
-
-        const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `pockettrack_python_statement_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        this.showToast('CSV statement downloaded successfully! 📊', 'success');
-      }
-
-      // ==========================================
-      // UI Rendering Pipeline
-      // ==========================================
-
-      formatCurrency(val) {
-        const formatted = Math.abs(Number(val) || 0).toLocaleString(undefined, {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 2
-        });
-        return `${this.currency}${formatted}`;
-      }
-
-      render() {
-        this.renderDashboardStats();
-        this.renderChart();
-        this.renderHistoryList();
-      }
-
-      renderDashboardStats() {
-        if (!this.summary) return;
-
-        const { upi_balance, cash_balance, total_pocket_money, total_spent, remaining_pocket_money, spend_ratio } = this.summary;
-
-        this.statUpiBalance.textContent = (upi_balance < 0 ? '-' : '') + this.formatCurrency(upi_balance);
-        this.statCashBalance.textContent = (cash_balance < 0 ? '-' : '') + this.formatCurrency(cash_balance);
-
-        const upiCount = this.transactions.filter(t => t.account === 'UPI' || t.from_account === 'UPI' || t.to_account === 'UPI').length;
-        const cashCount = this.transactions.filter(t => t.account === 'Cash' || t.from_account === 'Cash' || t.to_account === 'Cash').length;
-        const incomeCount = this.transactions.filter(t => t.type === 'income').length;
-
-        this.statUpiCount.textContent = `${upiCount} record${upiCount === 1 ? '' : 's'}`;
-        this.statCashCount.textContent = `${cashCount} record${cashCount === 1 ? '' : 's'}`;
-        this.statPocketMoneyCount.textContent = `${incomeCount} deposit${incomeCount === 1 ? '' : 's'}`;
-
-        this.statTotalPocketMoney.textContent = this.formatCurrency(total_pocket_money);
-        this.statTotalSpent.textContent = this.formatCurrency(total_spent);
-
-        this.statSpendRatioBadge.textContent = `${spend_ratio}% Spent`;
-        this.statSpentBar.style.width = `${Math.min(100, Math.max(0, spend_ratio))}%`;
-
-        if (remaining_pocket_money >= 0) {
-          this.statRemainingPocketMoney.textContent = `${this.formatCurrency(remaining_pocket_money)} remaining pocket money`;
-          this.statRemainingPocketMoney.className = 'text-[11px] text-emerald-600 dark:text-emerald-400 mt-2 truncate font-semibold';
-        } else {
-          this.statRemainingPocketMoney.textContent = `Deficit of ${this.formatCurrency(Math.abs(remaining_pocket_money))}! Over budget`;
-          this.statRemainingPocketMoney.className = 'text-[11px] text-rose-600 dark:text-rose-400 mt-2 truncate font-semibold';
-        }
-      }
-
-      // --- Chart & Leaderboard ---
-      initChart() {
-        const isDark = document.documentElement.classList.contains('dark');
-        const textColor = isDark ? '#94a3b8' : '#64748b';
-        const gridColor = isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.8)';
-        const ctx = document.getElementById('categoryChart').getContext('2d');
-        const isBar = this.chartType === 'bar';
-
-        const config = {
-          type: this.chartType,
-          data: {
-            labels: [],
-            datasets: [{
-              data: [],
-              backgroundColor: [],
-              borderWidth: isBar ? 0 : 2,
-              borderColor: isDark ? '#0f172a' : '#ffffff',
-              borderRadius: isBar ? 6 : 0,
-              hoverOffset: isBar ? 0 : 6
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: isBar ? 'y' : 'x',
-            cutout: isBar ? undefined : '72%',
-            plugins: {
-              legend: {
-                display: !isBar,
-                position: 'bottom',
-                labels: {
-                  color: textColor,
-                  font: { family: 'Plus Jakarta Sans', size: 10, weight: '500' },
-                  boxWidth: 8,
-                  boxHeight: 8,
-                  padding: 8,
-                  usePointStyle: true,
-                  pointStyle: 'circle'
-                }
-              },
-              tooltip: {
-                backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                titleColor: isDark ? '#f8fafc' : '#0f172a',
-                bodyColor: isDark ? '#cbd5e1' : '#334155',
-                borderColor: isDark ? '#334155' : '#e2e8f0',
-                borderWidth: 1,
-                padding: 9,
-                callbacks: {
-                  label: (context) => {
-                    const label = context.label || '';
-                    const value = context.raw || 0;
-                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                    const pct = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                    return ` ${label}: ${this.formatCurrency(value)} (${pct}%)`;
-                  }
-                }
-              }
-            }
-          }
-        };
-
-        if (isBar) {
-          config.options.scales = {
-            x: {
-              grid: { color: gridColor },
-              ticks: {
-                color: textColor,
-                font: { family: 'Plus Jakarta Sans', size: 10 },
-                callback: (v) => `${this.currency}${v}`
-              }
-            },
-            y: {
-              grid: { display: false },
-              ticks: {
-                color: textColor,
-                font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' }
-              }
-            }
-          };
-        }
-
-        this.chart = new Chart(ctx, config);
-      }
-
-      setChartView(type) {
-        if (this.chartType === type) return;
-        this.chartType = type;
-        const activeClass = 'px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition';
-        const inactiveClass = 'px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
-
-        this.chartViewDonut.className = type === 'doughnut' ? activeClass : inactiveClass;
-        this.chartViewBar.className = type === 'bar' ? activeClass : inactiveClass;
-
-        if (this.chart) {
-          this.chart.destroy();
-          this.chart = null;
-        }
-        this.initChart();
-        this.renderChart();
-      }
-
-      setChartAccountFilter(account) {
-        this.chartFilterAccount = account;
-        const activeClass = 'px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition';
-        const inactiveClass = 'px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
-
-        this.chartFilterAll.className = account === 'all' ? activeClass : inactiveClass;
-        this.chartFilterUPI.className = account === 'UPI' ? activeClass : inactiveClass;
-        this.chartFilterCash.className = account === 'Cash' ? activeClass : inactiveClass;
-
-        this.renderChart();
-      }
-
-      renderChart() {
-        if (!this.chart) return;
-
-        const isDark = document.documentElement.classList.contains('dark');
-        const textColor = isDark ? '#94a3b8' : '#64748b';
-        const borderColor = isDark ? '#0f172a' : '#ffffff';
-        const isDoughnut = this.chartType === 'doughnut';
-
-        // Filter ONLY actual expenses (internal transfers are strictly excluded)
-        const expenseTxs = this.transactions.filter((t) => {
-          if (t.type !== 'expense') return false;
-          if (this.chartFilterAccount !== 'all' && t.account !== this.chartFilterAccount) return false;
-          return true;
-        });
-
-        const categoryMap = {};
-        let totalExpense = 0;
-
-        expenseTxs.forEach((t) => {
-          const amt = Number(t.amount);
-          categoryMap[t.category] = (categoryMap[t.category] || 0) + amt;
-          totalExpense += amt;
-        });
-
-        const sorted = Object.entries(categoryMap).sort((a, b) => b[1] - a[1]);
-        const labels = sorted.map(s => s[0]);
-        const data = sorted.map(s => s[1]);
-
-        this.chartCategoryCount.textContent = `${labels.length} Categories`;
-
-        if (labels.length === 0) {
-          this.noDataChart.classList.remove('hidden');
-          this.chartCenterOverlay.classList.add('hidden');
-          document.getElementById('categoryChart').classList.add('opacity-0');
-          this.categoryLeaderboard.innerHTML = `
-            <div class="py-8 text-center text-slate-400">
-              <i class="fa-solid fa-receipt text-2xl mb-1.5 text-slate-300 dark:text-slate-700"></i>
-              <p class="text-xs font-medium">No actual expenses logged for this view.</p>
-            </div>
-          `;
-        } else {
-          this.noDataChart.classList.add('hidden');
-          document.getElementById('categoryChart').classList.remove('opacity-0');
-
-          if (isDoughnut) {
-            this.chartCenterOverlay.classList.remove('hidden');
-            this.chartCenterAmount.textContent = this.formatCurrency(totalExpense);
-            this.chartCenterSubtext.textContent = this.chartFilterAccount === 'all' ? 'all wallets' : `${this.chartFilterAccount} only`;
-          } else {
-            this.chartCenterOverlay.classList.add('hidden');
-          }
-
-          const bgColors = labels.map((l) => {
-            const found = CATEGORIES.expense.find(c => c.id === l);
-            return found ? found.color : '#64748b';
-          });
-
-          this.chart.data.labels = labels;
-          this.chart.data.datasets[0].data = data;
-          this.chart.data.datasets[0].backgroundColor = bgColors;
-          this.chart.data.datasets[0].borderColor = borderColor;
-
-          // Render Leaderboard
-          this.categoryLeaderboard.innerHTML = sorted.map(([catName, amt]) => {
-            const pct = totalExpense > 0 ? ((amt / totalExpense) * 100).toFixed(1) : 0;
-            const catMeta = CATEGORIES.expense.find(c => c.id === catName) || {
-              icon: 'fa-tag',
-              color: '#6366f1',
-              bg: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
-            };
-
-            return `
-              <div onclick="window.app.filterByCategory('${catName}')" title="Click to view history for ${catName}" class="py-2.5 px-2 hover:bg-slate-100/70 dark:hover:bg-slate-800/50 rounded-xl cursor-pointer transition group">
-                <div class="flex items-center justify-between mb-1.5 text-xs">
-                  <div class="flex items-center gap-2">
-                    <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] ${catMeta.bg}">
-                      <i class="fa-solid ${catMeta.icon}"></i>
-                    </span>
-                    <span class="font-bold text-slate-800 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition">${catName}</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-extrabold text-slate-900 dark:text-white">${this.formatCurrency(amt)}</span>
-                    <span class="font-semibold px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200/40 dark:border-slate-700/40">${pct}%</span>
-                  </div>
-                </div>
-                <div class="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                  <div class="h-1.5 rounded-full transition-all duration-500" style="width: ${pct}%; background-color: ${catMeta.color};"></div>
-                </div>
-              </div>
-            `;
-          }).join('');
-        }
-
-        if (this.chart.options.plugins && this.chart.options.plugins.legend) {
-          this.chart.options.plugins.legend.labels.color = textColor;
-        }
-        this.chart.update();
-      }
-
-      filterByCategory(catName) {
-        this.filters.category = catName;
-        this.filterCategory.value = catName;
-        this.renderHistoryList();
-        document.getElementById('history-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        this.showToast(`Filtered by "${catName}"`, 'info');
-      }
-
-      setHistoryAccountFilter(account) {
-        this.filters.account = account;
-        const activeClass = 'px-2.5 py-1 rounded-lg bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white transition';
-        const inactiveClass = 'px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
-
-        this.tabFilterAll.className = account === 'all' ? activeClass : inactiveClass;
-        this.tabFilterUPI.className = (account === 'UPI' ? activeClass : inactiveClass) + ' flex items-center gap-1';
-        this.tabFilterCash.className = (account === 'Cash' ? activeClass : inactiveClass) + ' flex items-center gap-1';
-
-        this.renderHistoryList();
-      }
-
-      getFilteredTransactions() {
-        const { account, type, category, search, sort } = this.filters;
-
-        return this.transactions
-          .filter((t) => {
-            // Account filter (handles transfers where account is either from or to)
-            if (account !== 'all') {
-              if (t.type === 'transfer') {
-                if (t.from_account !== account && t.to_account !== account) return false;
-              } else {
-                if (t.account !== account) return false;
-              }
-            }
-
-            // Type filter
-            if (type !== 'all' && t.type !== type) return false;
-
-            // Category filter
-            if (category !== 'all' && t.category !== category) return false;
-
-            // Search filter
-            if (search) {
-              const inTitle = (t.title || '').toLowerCase().includes(search);
-              const inNotes = (t.notes || '').toLowerCase().includes(search);
-              const inCat = (t.category || '').toLowerCase().includes(search);
-              if (!inTitle && !inNotes && !inCat) return false;
-            }
-
-            return true;
-          })
-          .sort((a, b) => {
-            if (sort === 'date-desc') return new Date(b.date) - new Date(a.date);
-            if (sort === 'date-asc') return new Date(a.date) - new Date(b.date);
-            if (sort === 'amount-desc') return b.amount - a.amount;
-            if (sort === 'amount-asc') return a.amount - b.amount;
-            return 0;
-          });
-      }
-
-      renderHistoryList() {
-        const filtered = this.getFilteredTransactions();
-        this.txCountBadge.textContent = filtered.length;
-
-        if (filtered.length === 0) {
-          this.transactionList.innerHTML = '';
-          this.emptyState.classList.remove('hidden');
-          return;
-        }
-
-        this.emptyState.classList.add('hidden');
-
-        this.transactionList.innerHTML = filtered.map((t) => {
-          const isIncome = t.type === 'income';
-          const isTransfer = t.type === 'transfer';
-          const isExpense = t.type === 'expense';
-
-          let icon = 'fa-arrow-down';
-          let iconBg = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
-          let badgeHtml = '';
-          let amountColor = 'text-slate-900 dark:text-white';
-          let amountPrefix = '-';
-
-          if (isIncome) {
-            icon = 'fa-hand-holding-dollar';
-            iconBg = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
-            amountColor = 'text-emerald-600 dark:text-emerald-400';
-            amountPrefix = '+';
-            const isUPI = t.account === 'UPI';
-            badgeHtml = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isUPI ? 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300' : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'}">${t.account}</span>`;
-          } else if (isTransfer) {
-            icon = 'fa-right-left';
-            iconBg = 'bg-indigo-500/10 text-brand-600 dark:text-brand-400';
-            amountColor = 'text-brand-600 dark:text-brand-400';
-            amountPrefix = '↔ ';
-            badgeHtml = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800">${t.from_account} → ${t.to_account}</span>`;
-          } else {
-            // Expense
-            const foundCat = CATEGORIES.expense.find(c => c.id === t.category);
-            if (foundCat) {
-              icon = foundCat.icon;
-              iconBg = foundCat.bg;
-            }
-            const isUPI = t.account === 'UPI';
-            badgeHtml = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isUPI ? 'bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300' : 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'}">${t.account}</span>`;
-          }
-
-          const dateObj = new Date(t.date);
-          const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-
-          return `
-            <div class="glass-panel tx-item rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3 group">
-              
-              <!-- Left Info -->
-              <div class="flex items-center gap-3 min-w-0">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm shrink-0 ${iconBg}">
-                  <i class="fa-solid ${icon}"></i>
-                </div>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">${this.escapeHTML(t.title)}</h4>
-                    ${badgeHtml}
-                  </div>
-                  <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    <span class="text-[11px] font-medium">${t.category || 'Transfer'}</span>
-                    <span>•</span>
-                    <span class="text-[11px]">${formattedDate}</span>
-                    ${t.notes ? `<span class="truncate max-w-[140px] text-slate-400 italic">(${this.escapeHTML(t.notes)})</span>` : ''}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Right Info & Delete Button -->
-              <div class="flex items-center gap-3 shrink-0">
-                <span class="text-sm sm:text-base font-extrabold ${amountColor}">
-                  ${amountPrefix}${this.formatCurrency(t.amount)}
-                </span>
-                <button onclick="window.app.deleteTransaction('${t.id}')" title="Delete transaction" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition">
-                  <i class="fa-regular fa-trash-can text-xs"></i>
-                </button>
-              </div>
-
-            </div>
-          `;
-        }).join('');
-      }
-
-      escapeHTML(str) {
-        if (!str) return '';
-        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
-      }
-
-      showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-xl text-xs font-semibold text-white transition-all transform duration-200 translate-y-3 opacity-0`;
-
-        let icon = 'fa-info-circle';
-        let bg = 'bg-slate-800';
-
-        if (type === 'success') {
-          icon = 'fa-circle-check';
-          bg = 'bg-emerald-600 shadow-emerald-600/30';
-        } else if (type === 'error') {
-          icon = 'fa-circle-exclamation';
-          bg = 'bg-rose-600 shadow-rose-600/30';
-        } else if (type === 'info') {
-          icon = 'fa-bell';
-          bg = 'bg-indigo-600 shadow-indigo-600/30';
-        }
-
-        toast.className += ` ${bg}`;
-        toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${message}</span>`;
-        this.toastContainer.appendChild(toast);
-
-        setTimeout(() => {
-          toast.classList.remove('translate-y-3', 'opacity-0');
-          toast.classList.add('translate-y-0', 'opacity-100');
-        }, 10);
-
-        setTimeout(() => {
-          toast.classList.remove('translate-y-0', 'opacity-100');
-          toast.classList.add('translate-y-2', 'opacity-0');
-          setTimeout(() => toast.remove(), 250);
-        }, 3200);
-      }
-    }
-
-    // Bootstrap
-    document.addEventListener('DOMContentLoaded', () => {
-      window.app = new StudentExpenseTracker();
-    });
-  </script>
+  <script src="/app.js"></script>
 </body>
 </html>

@@ -195,6 +195,16 @@ class StudentExpenseApp {
     this.cloudStatusDot = document.getElementById('cloudStatusDot');
     this.cloudStatusText = document.getElementById('cloudStatusText');
     this.toastContainer = document.getElementById('toastContainer');
+
+    // PWA & Installation
+    this.installAppBtn = document.getElementById('installAppBtn');
+    this.installModal = document.getElementById('installModal');
+    this.installModalContent = document.getElementById('installModalContent');
+    this.closeInstallModalBtn = document.getElementById('closeInstallModalBtn');
+    this.dismissInstallModalBtn = document.getElementById('dismissInstallModalBtn');
+    this.triggerNativeInstallBtn = document.getElementById('triggerNativeInstallBtn');
+    this.nativeInstallPromptBox = document.getElementById('nativeInstallPromptBox');
+    this.deferredInstallPrompt = null;
   }
 
   initTheme() {
@@ -360,11 +370,121 @@ class StudentExpenseApp {
         e.preventDefault();
         if (this.searchInput) this.searchInput.focus();
       } else if (e.key === 'Escape') {
-        if (!this.transferModal.classList.contains('hidden')) {
+        if (this.transferModal && !this.transferModal.classList.contains('hidden')) {
           this.closeTransferModal();
+        }
+        if (this.installModal && !this.installModal.classList.contains('hidden')) {
+          this.closeInstallModal();
         }
       }
     });
+
+    // PWA Installation & Service Worker Integration
+    this.initPWA();
+  }
+
+  initPWA() {
+    // 1. Listen for PWA Install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredInstallPrompt = e;
+      if (this.nativeInstallPromptBox) this.nativeInstallPromptBox.classList.remove('hidden');
+      if (this.installAppBtn) {
+        this.installAppBtn.classList.remove('hidden');
+        this.installAppBtn.classList.add('animate-pulse');
+      }
+    });
+
+    // 2. Listen for App Installed event
+    window.addEventListener('appinstalled', () => {
+      this.deferredInstallPrompt = null;
+      this.showToast('PocketTrack App installed successfully! 🎉', 'success');
+      if (this.installAppBtn) {
+        this.installAppBtn.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-300"></i> <span class="hidden sm:inline">Installed</span>';
+        this.installAppBtn.classList.remove('animate-pulse');
+        this.installAppBtn.classList.replace('bg-emerald-600', 'bg-slate-700');
+      }
+      this.closeInstallModal();
+    });
+
+    // 3. Install App Button click handler
+    if (this.installAppBtn) {
+      this.installAppBtn.addEventListener('click', () => {
+        if (this.deferredInstallPrompt) {
+          this.handleNativeInstall();
+        } else {
+          this.openInstallModal();
+        }
+      });
+    }
+
+    if (this.triggerNativeInstallBtn) {
+      this.triggerNativeInstallBtn.addEventListener('click', () => this.handleNativeInstall());
+    }
+
+    if (this.closeInstallModalBtn) {
+      this.closeInstallModalBtn.addEventListener('click', () => this.closeInstallModal());
+    }
+
+    if (this.dismissInstallModalBtn) {
+      this.dismissInstallModalBtn.addEventListener('click', () => this.closeInstallModal());
+    }
+
+    // 4. Register Service Worker for offline PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          console.log('✅ PocketTrack ServiceWorker registered with scope:', reg.scope);
+        }).catch((err) => {
+          console.warn('ServiceWorker registration error:', err);
+        });
+      });
+    }
+
+    // 5. Detect Standalone PWA mode
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone && this.installAppBtn) {
+      this.installAppBtn.innerHTML = '<i class="fa-solid fa-mobile-screen-button text-emerald-400"></i> <span class="hidden sm:inline">App Mode</span>';
+      this.installAppBtn.classList.remove('animate-pulse');
+    }
+  }
+
+  openInstallModal() {
+    this.sound.playPop();
+    if (this.installModal) {
+      this.installModal.classList.remove('hidden');
+      setTimeout(() => {
+        if (this.installModalContent) {
+          this.installModalContent.classList.remove('scale-95', 'opacity-0');
+          this.installModalContent.classList.add('scale-100', 'opacity-100');
+        }
+      }, 10);
+    }
+  }
+
+  closeInstallModal() {
+    if (this.installModalContent) {
+      this.installModalContent.classList.remove('scale-100', 'opacity-100');
+      this.installModalContent.classList.add('scale-95', 'opacity-0');
+    }
+    setTimeout(() => {
+      if (this.installModal) this.installModal.classList.add('hidden');
+    }, 200);
+  }
+
+  async handleNativeInstall() {
+    if (this.deferredInstallPrompt) {
+      this.deferredInstallPrompt.prompt();
+      const choice = await this.deferredInstallPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        this.sound.playSuccess();
+        this.showToast('PocketTrack App installation accepted! 🚀', 'success');
+      }
+      this.deferredInstallPrompt = null;
+      this.closeInstallModal();
+    } else {
+      this.openInstallModal();
+    }
   }
 
   applyPreset({ title, amount, cat, acc, type }) {
@@ -555,6 +675,13 @@ class StudentExpenseApp {
         if (tx.account === 'UPI') upiBalance -= amt;
         else if (tx.account === 'Cash') cashBalance -= amt;
         categoryMap[tx.category] = (categoryMap[tx.category] || 0) + amt;
+      } else if (tx.type === 'transfer') {
+        const fromAcc = tx.from_account || (tx.account === 'UPI' ? 'UPI' : 'Cash');
+        const toAcc = tx.to_account || (fromAcc === 'UPI' ? 'Cash' : 'UPI');
+        if (fromAcc === 'UPI') upiBalance -= amt;
+        else if (fromAcc === 'Cash') cashBalance -= amt;
+        if (toAcc === 'UPI') upiBalance += amt;
+        else if (toAcc === 'Cash') cashBalance += amt;
       }
     });
 
@@ -718,23 +845,23 @@ class StudentExpenseApp {
   }
 
   async deleteTransaction(id) {
-    if (!confirm('Are you sure you want to delete this record?')) return;
+    if (!confirm('Are you sure you want to permanently delete this record?')) return;
     this.sound.playPop();
 
     try {
       const res = await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        this.transactions = this.transactions.filter((t) => t._id !== id);
+        this.transactions = this.transactions.filter((t) => t._id !== id && t.id !== id);
         this.summary = data.summary;
         this.render();
-        this.showToast('Transaction deleted.', 'info');
+        this.showToast('Transaction deleted permanently.', 'info');
       } else {
         this.showToast(data.error || 'Failed to delete transaction', 'error');
       }
     } catch (err) {
       console.warn('Network error, deleting locally:', err);
-      this.transactions = this.transactions.filter((t) => t._id !== id);
+      this.transactions = this.transactions.filter((t) => t._id !== id && t.id !== id);
       localStorage.setItem('pt_local_txs', JSON.stringify(this.transactions));
       this.summary = this.calculateLocalSummary(this.transactions);
       this.render();
@@ -1124,16 +1251,27 @@ class StudentExpenseApp {
 
     this.transactionList.innerHTML = filtered
       .map((t) => {
+        const txId = t._id || t.id;
+        const isTransfer = t.type === 'transfer';
         const isIncome = t.type === 'income';
         const isUPI = t.account === 'UPI';
         const metaList = CATEGORIES[t.type] || [];
         const catMeta = metaList.find((c) => c.id === t.category) || {
-          icon: isIncome ? 'fa-arrow-up' : 'fa-arrow-down',
-          bg: isIncome ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'
+          icon: isTransfer ? 'fa-right-left' : isIncome ? 'fa-arrow-up' : 'fa-arrow-down',
+          bg: isTransfer ? 'bg-indigo-500/10 text-brand-600' : isIncome ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'
         };
 
         const dateObj = new Date(t.date);
         const formattedDate = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+        let accountBadge = '';
+        if (isTransfer) {
+          const from = t.from_account || (t.account === 'UPI' ? 'UPI' : 'Cash');
+          const to = t.to_account || (from === 'UPI' ? 'Cash' : 'UPI');
+          accountBadge = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/10 text-brand-600 border border-brand-200 dark:border-brand-800">${from} → ${to}</span>`;
+        } else {
+          accountBadge = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isUPI ? 'badge-upi' : 'badge-cash'}">${t.account || 'UPI'}</span>`;
+        }
 
         return `
           <div class="glass-panel tx-item rounded-xl p-3.5 sm:p-4 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3 group">
@@ -1146,10 +1284,7 @@ class StudentExpenseApp {
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
                   <h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">${this.escapeHTML(t.title)}</h4>
-                  <!-- Account Badge -->
-                  <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isUPI ? 'badge-upi' : 'badge-cash'}">
-                    ${t.account}
-                  </span>
+                  ${accountBadge}
                 </div>
                 <div class="flex items-center gap-2 mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                   <span class="text-[11px] font-medium">${t.category}</span>
@@ -1162,10 +1297,10 @@ class StudentExpenseApp {
 
             <!-- Right Info & Delete Button -->
             <div class="flex items-center gap-3 shrink-0">
-              <span class="text-sm sm:text-base font-extrabold ${isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}">
-                ${isIncome ? '+' : '-'}${this.formatCurrency(t.amount)}
+              <span class="text-sm sm:text-base font-extrabold ${isTransfer ? 'text-brand-600 dark:text-brand-400' : isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white'}">
+                ${isTransfer ? '⇄ ' : isIncome ? '+' : '-'}${this.formatCurrency(t.amount)}
               </span>
-              <button onclick="window.app.deleteTransaction('${t._id}')" title="Delete transaction" class="tx-action-btn w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition">
+              <button onclick="window.app.deleteTransaction('${txId}')" title="Delete transaction" class="tx-action-btn w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition">
                 <i class="fa-regular fa-trash-can text-xs"></i>
               </button>
             </div>

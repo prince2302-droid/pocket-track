@@ -3,20 +3,23 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+const User = require('./models/User');
 const Transaction = require('./models/Transaction');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
+const JWT_SECRET = process.env.JWT_SECRET || 'pockettrack_super_secure_jwt_secret_student_2026';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Database Connection Manager (with caching for Serverless & Vercel environments)
+// Database Connection Manager (with connection reuse for Serverless & Vercel)
 let cachedDbPromise = null;
 
 async function connectToDatabase() {
@@ -51,7 +54,7 @@ if (MONGODB_URI) {
     console.log('ℹ️  Ensure your IP is whitelisted (0.0.0.0/0) in MongoDB Atlas Network Access.');
   });
 } else {
-  console.log('⚠️  MONGODB_URI is not set in .env. Server will run in demo/offline mode.');
+  console.log('⚠️  MONGODB_URI is not set in .env. Server running in fallback mode.');
 }
 
 // Auto-connect middleware for all API requests
@@ -66,11 +69,51 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// In-memory fallback only used if MongoDB URI is missing or disconnected
+// JWT Helper
+function generateToken(id) {
+  return jwt.sign({ id }, JWT_SECRET, { expiresIn: '30d' });
+}
+
+// Auth Helper to extract user from token
+async function getAuthUser(req) {
+  let token = null;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  if (!token) return null;
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (!decoded || !decoded.id) return null;
+    const user = await User.findOne({ _id: decoded.id }).select('-password');
+    return user;
+  } catch (err) {
+    return null;
+  }
+}
+
+// Middleware: Require Authentication
+async function requireAuth(req, res, next) {
+  const user = await getAuthUser(req);
+  if (!user) {
+    return res.status(401).json({ success: false, error: 'Authentication required. Please log in.' });
+  }
+  req.user = user;
+  next();
+}
+
+// Middleware: Optional Authentication (attaches req.user if token present)
+async function optionalAuth(req, res, next) {
+  req.user = await getAuthUser(req);
+  next();
+}
+
+// Fallback in-memory demo data
 let localDemoStore = [
   {
     _id: 'demo-1',
     id: 'demo-1',
+    userId: null,
     title: 'Monthly Pocket Money from Parents',
     amount: 5000,
     type: 'income',
@@ -82,6 +125,7 @@ let localDemoStore = [
   {
     _id: 'demo-2',
     id: 'demo-2',
+    userId: null,
     title: 'Campus ATM Cash Withdrawal',
     amount: 1500,
     type: 'transfer',
@@ -126,7 +170,6 @@ function calculateSummary(transactions) {
 
       if (toAcc === 'UPI') upiBalance += amt;
       else if (toAcc === 'Cash') cashBalance += amt;
-      // Transfer does not change total pocket money or total spent
     }
   });
 
@@ -143,10 +186,165 @@ function calculateSummary(transactions) {
 }
 
 // ==========================================
-// API ROUTES
+// 1. AUTHENTICATION ROUTES
 // ==========================================
 
-// 1. Database Connection Status
+// Signup: Register new user
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, error: 'Please enter Name, Email, and Password.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email: cleanEmail });
+    if (existingUser) {
+      return res.status(400).json({ success: false, error: 'An account with this email already exists. Please log in.' });
+    }
+
+    const userId = crypto.randomUUID();
+    const newUser = await User.create({
+      _id: userId,
+      name: name.trim(),
+      email: cleanEmail,
+      password: password
+    });
+
+    // Adopt any legacy unassigned transactions in MongoDB so existing data is preserved
+    const adopted = await Transaction.updateMany(
+      { $or: [{ userId: null }, { userId: { $exists: false } }] },
+      { userId: newUser._id }
+    );
+
+    // If no transactions exist, create starter pocket money
+    const count = await Transaction.countDocuments({ userId: newUser._id });
+    if (count === 0) {
+      await Transaction.create({
+        _id: crypto.randomUUID(),
+        userId: newUser._id,
+        title: 'Monthly Pocket Money from Parents',
+        amount: 5000,
+        type: 'income',
+        account: 'UPI',
+        category: 'Pocket Money',
+        date: new Date(),
+        notes: 'Initial pocket money transfer'
+      });
+    }
+
+    const token = generateToken(newUser._id);
+
+    return res.status(201).json({
+      success: true,
+      token,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        defaultCurrency: newUser.defaultCurrency
+      },
+      message: 'Account created successfully! Your data is saved permanently.'
+    });
+  } catch (err) {
+    console.error('Signup error:', err);
+    res.status(500).json({ success: false, error: err.message || 'Server error during signup.' });
+  }
+});
+
+// Login: Authenticate existing user
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: 'Please provide both email and password.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail });
+
+    if (!user) {
+      return res.status(401).json({ success: false, error: 'No account found with this email address.' });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: 'Incorrect password. Please try again.' });
+    }
+
+    // Adopt any orphaned transactions
+    await Transaction.updateMany(
+      { $or: [{ userId: null }, { userId: { $exists: false } }] },
+      { userId: user._id }
+    );
+
+    const token = generateToken(user._id);
+
+    return res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        defaultCurrency: user.defaultCurrency
+      },
+      message: `Welcome back, ${user.name}!`
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, error: err.message || 'Server error during login.' });
+  }
+});
+
+// Get Current User Profile
+app.get('/api/auth/me', requireAuth, async (req, res) => {
+  res.json({
+    success: true,
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      defaultCurrency: req.user.defaultCurrency,
+      createdAt: req.user.createdAt
+    }
+  });
+});
+
+// Update Profile Settings (Currency preference, name)
+app.put('/api/auth/profile', requireAuth, async (req, res) => {
+  try {
+    const { name, defaultCurrency } = req.body;
+    if (name) req.user.name = name.trim();
+    if (defaultCurrency) req.user.defaultCurrency = defaultCurrency;
+    await req.user.save();
+
+    res.json({
+      success: true,
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        defaultCurrency: req.user.defaultCurrency
+      },
+      message: 'Profile updated successfully.'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ==========================================
+// 2. TRANSACTION ROUTES (USER-PARTITIONED)
+// ==========================================
+
+// Database Connection Status
 app.get('/api/status', (req, res) => {
   const isConnected = mongoose.connection.readyState === 1;
   res.json({
@@ -158,14 +356,20 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-// 2. Get All Transactions
-app.get('/api/transactions', async (req, res) => {
+// Get All Transactions for Active User
+app.get('/api/transactions', optionalAuth, async (req, res) => {
   try {
     const { account, type, category } = req.query;
     const isConnected = mongoose.connection.readyState === 1;
+    const userId = req.user ? req.user._id : null;
 
     if (isConnected) {
       const filter = {};
+
+      if (userId) {
+        filter.userId = userId;
+      }
+
       if (account && account !== 'all') {
         filter.$or = [
           { account: account },
@@ -177,10 +381,17 @@ app.get('/api/transactions', async (req, res) => {
       if (category && category !== 'all') filter.category = category;
 
       const transactions = await Transaction.find(filter).sort({ date: -1, createdAt: -1 });
-      const allTxForSummary = await Transaction.find({});
+      const allTxForSummary = await Transaction.find(userId ? { userId } : {});
       const summary = calculateSummary(allTxForSummary);
 
-      return res.json({ success: true, transactions, summary, isCloud: true });
+      return res.json({
+        success: true,
+        transactions,
+        summary,
+        isCloud: true,
+        authenticated: !!req.user,
+        user: req.user ? { id: req.user._id, name: req.user.name, email: req.user.email } : null
+      });
     } else {
       let filtered = [...localDemoStore];
       if (account && account !== 'all') {
@@ -192,15 +403,15 @@ app.get('/api/transactions', async (req, res) => {
       filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
       const summary = calculateSummary(localDemoStore);
 
-      return res.json({ success: true, transactions: filtered, summary, isCloud: false });
+      return res.json({ success: true, transactions: filtered, summary, isCloud: false, authenticated: !!req.user });
     }
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// 3. Create a Transaction
-app.post('/api/transactions', async (req, res) => {
+// Create a Transaction
+app.post('/api/transactions', optionalAuth, async (req, res) => {
   try {
     const { title, amount, type, account, category, date, notes } = req.body;
 
@@ -210,10 +421,12 @@ app.post('/api/transactions', async (req, res) => {
 
     const txId = crypto.randomUUID();
     const parsedDate = date ? new Date(date) : new Date();
+    const userId = req.user ? req.user._id : null;
 
     const txPayload = {
       _id: txId,
       id: txId,
+      userId: userId,
       title: title.trim(),
       amount: parseFloat(parseFloat(amount).toFixed(2)),
       type: type || 'expense',
@@ -230,7 +443,7 @@ app.post('/api/transactions', async (req, res) => {
 
     if (isConnected) {
       const newTx = await Transaction.create(txPayload);
-      const allTx = await Transaction.find({});
+      const allTx = await Transaction.find(userId ? { userId } : {});
       const summary = calculateSummary(allTx);
       return res.status(201).json({ success: true, transaction: newTx, summary });
     } else {
@@ -247,8 +460,8 @@ app.post('/api/transactions', async (req, res) => {
   }
 });
 
-// 4. Quick Account Transfer (e.g. ATM Cash Withdrawal from UPI)
-app.post('/api/transactions/transfer', async (req, res) => {
+// Quick Account Transfer
+app.post('/api/transactions/transfer', optionalAuth, async (req, res) => {
   try {
     const { fromAccount, toAccount, amount, notes } = req.body;
     const numAmount = parseFloat(amount);
@@ -262,11 +475,13 @@ app.post('/api/transactions/transfer', async (req, res) => {
     }
 
     const txId = crypto.randomUUID();
+    const userId = req.user ? req.user._id : null;
     const memo = notes || `Transfer from ${fromAccount} to ${toAccount}`;
 
     const transferTx = {
       _id: txId,
       id: txId,
+      userId: userId,
       title: `Transfer to ${toAccount}`,
       amount: numAmount,
       type: 'transfer',
@@ -283,7 +498,7 @@ app.post('/api/transactions/transfer', async (req, res) => {
 
     if (isConnected) {
       const createdTransfer = await Transaction.create(transferTx);
-      const allTx = await Transaction.find({});
+      const allTx = await Transaction.find(userId ? { userId } : {});
       const summary = calculateSummary(allTx);
       return res.json({ success: true, transactions: [createdTransfer], summary });
     } else {
@@ -296,22 +511,28 @@ app.post('/api/transactions/transfer', async (req, res) => {
   }
 });
 
-// 5. Delete a Transaction
-app.delete('/api/transactions/:id', async (req, res) => {
+// Delete a Transaction
+app.delete('/api/transactions/:id', optionalAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const isConnected = mongoose.connection.readyState === 1;
+    const userId = req.user ? req.user._id : null;
 
     if (isConnected) {
-      const deleted = await Transaction.findOneAndDelete({
+      const deleteQuery = {
         $or: [{ _id: id }, { id: id }]
-      });
-
-      if (!deleted) {
-        return res.status(404).json({ success: false, error: 'Transaction not found.' });
+      };
+      if (userId) {
+        deleteQuery.userId = userId;
       }
 
-      const allTx = await Transaction.find({});
+      const deleted = await Transaction.findOneAndDelete(deleteQuery);
+
+      if (!deleted) {
+        return res.status(404).json({ success: false, error: 'Transaction not found or unauthorized.' });
+      }
+
+      const allTx = await Transaction.find(userId ? { userId } : {});
       const summary = calculateSummary(allTx);
       return res.json({ success: true, message: 'Transaction permanently deleted from MongoDB Atlas.', summary });
     } else {

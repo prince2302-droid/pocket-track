@@ -13,6 +13,11 @@ const transactionSchema = new mongoose.Schema(
         return this._id;
       }
     },
+    userId: {
+      type: String,
+      default: null,
+      index: true
+    },
     title: {
       type: String,
       required: [true, 'Please provide a title or description'],
@@ -85,6 +90,7 @@ const transactionSchema = new mongoose.Schema(
 );
 
 // Virtual field or index for fast querying
+transactionSchema.index({ userId: 1, date: -1 });
 transactionSchema.index({ date: -1 });
 transactionSchema.index({ account: 1 });
 transactionSchema.index({ type: 1 });

@@ -1,6 +1,6 @@
 /* ==========================================================================
    PocketTrack — Modern Student Finance Design System
-   Glassmorphism 2.0, Ambient Gradients, Micro-Interactions, Glow Effects
+   Glassmorphism 2.0, Multi-View SPA Layout, Micro-Interactions, Glow Effects
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&display=swap');
@@ -49,6 +49,57 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   min-height: 100vh;
+}
+
+/* ==========================================================================
+   Multi-View Transitions
+   ========================================================================== */
+.app-view {
+  display: none;
+}
+
+.app-view.active-view {
+  display: block;
+  animation: viewFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes viewFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==========================================================================
+   Navigation Bars & Tabs
+   ========================================================================== */
+.nav-tab-active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(79, 70, 229, 0.25));
+  color: #4f46e5;
+  border-color: rgba(99, 102, 241, 0.4);
+}
+.dark .nav-tab-active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(129, 140, 248, 0.2));
+  color: #a5b4fc;
+  border-color: rgba(129, 140, 248, 0.4);
+}
+
+.mobile-nav-btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mobile-nav-btn:active {
+  transform: scale(0.92);
+}
+
+.mobile-nav-active {
+  color: #4f46e5 !important;
+}
+.dark .mobile-nav-active {
+  color: #818cf8 !important;
 }
 
 /* ==========================================================================
@@ -398,28 +449,18 @@ button:active {
 }
 
 /* ==========================================================================
-   Number Count-Up Shimmer
-   ========================================================================== */
-.number-flash {
-  animation: numberPulse 0.4s ease-out;
-}
-
-@keyframes numberPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); color: #6366f1; }
-  100% { transform: scale(1); }
-}
-
-/* ==========================================================================
-   Print Styles (for student expense statement printout)
+   Print Styles
    ========================================================================== */
 @media print {
-  header, #transactionForm, .quick-chip, button, #toastContainer, #transferModal {
+  header, #mobileNav, button, #toastContainer, #authModal, #installModal {
     display: none !important;
   }
   body {
     background: white !important;
     color: black !important;
+  }
+  .app-view {
+    display: block !important;
   }
   .glass-panel {
     border: 1px solid #ccc !important;
